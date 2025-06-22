@@ -239,6 +239,7 @@ function selectMode(selectedMode) {
 
   document.getElementById("mode-selection").style.display = "none";
   document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
+  document.getElementById("back-button").style.display = "inline-block"; // Show back button
 
   if (mode === "bot") {
     document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
@@ -384,7 +385,12 @@ function checkAchievements() {
 
   if (msgs.length) {
     aDiv.innerHTML = msgs.join("<br>");
-    setTimeout(() => { aDiv.innerHTML = ""; }, 4000);
+    aDiv.style.display = "block";
+    aDiv.style.animation = "popInOut 3s ease-in-out";
+    setTimeout(() => {
+      aDiv.innerHTML = "";
+      aDiv.style.display = "none";
+    }, 3000);
   }
 }
 
@@ -397,13 +403,13 @@ lbBtn.addEventListener("click", () => {
   lbDiv.style.display = hidden ? "block" : "none";
   lbBtn.textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
 });
+
+// ---------- BACK BUTTON ----------
 function goBack() {
-  // Option 1: Return to mode selection
   document.getElementById("game-ui").style.display = "none";
   document.getElementById("room-controls").style.display = "none";
   document.getElementById("mode-selection").style.display = "flex";
   document.getElementById("toggle-leaderboard-btn").style.display = "none";
-
-  // Optional: reset leaderboard and achievements
+  document.getElementById("back-button").style.display = "none";
   resetGame();
-}
+} 
