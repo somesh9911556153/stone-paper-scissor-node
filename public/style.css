@@ -121,7 +121,18 @@ h1 {
 
 /* Result, Banter & Achievement */
 #result,
-#banter,
+#banter {
+  display: block;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.75rem;
+  color: #00ffff;
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
 #achievement {
   position: fixed;
   top: 50%;
