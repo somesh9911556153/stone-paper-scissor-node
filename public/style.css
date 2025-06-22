@@ -210,25 +210,50 @@ h1 {
 .emoji-banner {
   display: flex;
   justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-  font-size: 3rem;
-  animation: floatEmoji 3s ease-in-out infinite;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .emoji {
-  transition: transform 0.3s;
+  font-size: 3.5rem;
+  display: inline-block;
+  transition: transform 0.3s ease-in-out;
+  cursor: default;
 }
+
 .emoji:hover {
   transform: scale(1.3) rotate(10deg);
 }
 
-/* Optional floating animation */
-@keyframes floatEmoji {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
+/* 🗿 Bounce and Rotate */
+.emoji-stone {
+  animation: bounceSpin 3s infinite ease-in-out;
 }
 
+/* 📄 Gentle Float */
+.emoji-paper {
+  animation: floatPaper 4s infinite ease-in-out;
+}
 
+/* ✂️ Quick Wobble */
+.emoji-scissor {
+  animation: wiggleScissor 2.5s infinite ease-in-out;
+}
 
+/* Animations */
+@keyframes bounceSpin {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-10px) rotate(20deg); }
+}
+
+@keyframes floatPaper {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-15px); }
+}
+
+@keyframes wiggleScissor {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(10deg); }
+  50%      { transform: rotate(-10deg); }
+  75%      { transform: rotate(5deg); }
+}
