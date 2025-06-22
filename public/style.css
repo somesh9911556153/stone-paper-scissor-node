@@ -186,5 +186,26 @@ h1 {
   #room-controls button,
   #room-controls input { font-size: 0.9rem; }
 }
+#back-button {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1100;
+  background: rgba(255, 105, 97, 0.9);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 105, 97, 0.3);
+  transition: background 0.2s, transform 0.2s;
+}
+
+#back-button:hover {
+  background: #ff4c4c;
+  transform: scale(1.05);
+}
+
 
 
