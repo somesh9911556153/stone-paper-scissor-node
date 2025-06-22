@@ -397,3 +397,13 @@ lbBtn.addEventListener("click", () => {
   lbDiv.style.display = hidden ? "block" : "none";
   lbBtn.textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
 });
+function goBack() {
+  // Option 1: Return to mode selection
+  document.getElementById("game-ui").style.display = "none";
+  document.getElementById("room-controls").style.display = "none";
+  document.getElementById("mode-selection").style.display = "flex";
+  document.getElementById("toggle-leaderboard-btn").style.display = "none";
+
+  // Optional: reset leaderboard and achievements
+  resetGame();
+}
