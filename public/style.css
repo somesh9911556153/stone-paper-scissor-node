@@ -123,25 +123,29 @@ h1 {
 #result,
 #banter,
 #achievement {
-  margin: 0.75rem auto;
-  padding: 0.5rem;
-  background: #2D2F3A;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 10px #00FFFF;
-  color: #FF6F61;
-  font-size: 1rem;
-  min-height: 2.5rem;
-}
-#achievement {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: linear-gradient(90deg, #ff9800 60%, #ffd700 100%);
   color: #232946;
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  display: none;
   z-index: 1000;
+  animation: popInOut 3s ease-in-out;
 }
 
+/* Animation for appearing & disappearing */
+@keyframes popInOut {
+  0% { opacity: 0; transform: translate(-50%, -60%); }
+  10% { opacity: 1; transform: translate(-50%, -50%); }
+  90% { opacity: 1; transform: translate(-50%, -50%); }
+  100% { opacity: 0; transform: translate(-50%, -40%); }
+}
 /* Inline Leaderboard */
 .leaderboard-inline {
   margin: 1rem auto;
