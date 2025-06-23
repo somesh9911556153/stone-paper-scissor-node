@@ -438,7 +438,11 @@ let achievements = {
 // ---------- MODE SELECTION ----------
 function selectMode(selectedMode) {
   const bgMusic = document.getElementById("bg-music");
-  if (bgMusic) bgMusic.play().catch(() => {});
+  if (bgMusic) {
+    bgMusic.play().catch((err) => {
+      console.warn("Music autoplay was blocked:", err);
+    });
+  } // ✅ Properly close the if block
 
   mode = selectedMode;
   document.getElementById("mode-selection").style.display = "none";
