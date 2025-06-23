@@ -210,7 +210,7 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem 0;
 }
 
 .emoji {
@@ -218,6 +218,12 @@ h1 {
   display: inline-block;
   transition: transform 0.3s ease-in-out;
   cursor: default;
+  animation: floatUpDown 2s ease-in-out infinite;
+}
+@keyframes floatUpDown {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
 }
 
 .emoji:hover {
