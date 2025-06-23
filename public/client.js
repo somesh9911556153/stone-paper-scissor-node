@@ -541,7 +541,7 @@ function launchMultiplayer() {
 
   const avatar = document.getElementById("player-avatar");
   if (playerRole === "player1") {
-    avatar.src = "avtaar1.jpeg";
+    avatar.src = "avtaar1.png";
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
     avatar.src = "avtaar2.avif";
