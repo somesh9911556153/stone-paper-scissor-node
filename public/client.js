@@ -417,9 +417,7 @@
 
 // ---------- CONFIG & STATE ----------
 const choices = ["stone", "paper", "scissor"];
-let mode = null,
-    roomId = "",
-    playerRole = "";
+let mode = null, roomId = "", playerRole = "";
 let wins = 0, losses = 0, draws = 0;
 
 const gameover = new Audio("gameover.mp3"),
@@ -464,6 +462,7 @@ function goBack() {
   document.getElementById("mode-selection").style.display = "flex";
   document.getElementById("toggle-leaderboard-btn").style.display = "none";
   document.getElementById("back-button").style.display = "none";
+  showLoader(false); // ⛔ hides loader if active
   resetGame();
 }
 
@@ -485,10 +484,13 @@ function createRoom() {
   roomId = document.getElementById("room-id")?.value.trim();
   if (!roomId) return alert("Enter room code to create");
 
+  showLoader("⏳ Waiting for Player 2 to join...");
+
   db.ref("rooms/" + roomId).set({ player1: null, player2: null }, (error) => {
     if (error) {
       console.error("Failed to create room:", error);
       alert("Failed to create room");
+      showLoader(false);
     } else {
       playerRole = "player1";
       launchMultiplayer();
@@ -640,6 +642,7 @@ function showLoader(messageOrFalse) {
     loader.innerText = messageOrFalse;
     loader.style.display = "flex";
   } else {
+    loader.innerText = "";
     loader.style.display = "none";
   }
 }
@@ -658,6 +661,8 @@ lbBtn.addEventListener("click", () => {
   lbDiv.style.display = hidden ? "block" : "none";
   lbBtn.textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
 });
+
+// ---------- MUSIC TOGGLE ----------
 function toggleMusic() {
   const bgMusic = document.getElementById("bg-music");
   const btn = document.getElementById("music-toggle-btn");
@@ -670,5 +675,3 @@ function toggleMusic() {
     btn.textContent = "🔇 Unmute Music";
   }
 }
-
-
