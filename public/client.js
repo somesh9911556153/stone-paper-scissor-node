@@ -438,8 +438,17 @@ let achievements = {
 // ---------- MODE SELECTION ----------
 function selectMode(selectedMode) {
   const bgMusic = document.getElementById("bg-music");
-  if (bgMusic) bgMusic.play().catch(() => {});
 
+  if (bgMusic && bgMusic.paused) {
+    const canPlay = bgMusic.canPlayType("audio/mpeg");
+    if (canPlay) {
+      bgMusic.play().catch((err) => {
+        console.warn("Autoplay blocked or source unsupported:", err);
+      });
+    } else {
+      console.warn("music.mp3 is not a supported format.");
+    }
+  }
 
   mode = selectedMode;
   document.getElementById("mode-selection").style.display = "none";
@@ -456,6 +465,7 @@ function selectMode(selectedMode) {
     document.getElementById("game-ui").style.display = "none";
   }
 }
+
 
 function goBack() {
   document.getElementById("game-ui").style.display = "none";
