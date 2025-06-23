@@ -459,13 +459,17 @@ function selectMode(selectedMode) {
     document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
     document.getElementById("room-controls").style.display = "none";
     document.getElementById("game-ui").style.display = "block";
+
+    const avatar = document.getElementById("player-avatar");
+    avatar.src = "avatar1.png";
+    document.getElementById("avatar-section").style.display = "block";
   } else {
     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
     document.getElementById("room-controls").style.display = "block";
     document.getElementById("game-ui").style.display = "none";
+    document.getElementById("avatar-section").style.display = "none";
   }
 }
-
 
 function goBack() {
   document.getElementById("game-ui").style.display = "none";
@@ -473,7 +477,7 @@ function goBack() {
   document.getElementById("mode-selection").style.display = "flex";
   document.getElementById("toggle-leaderboard-btn").style.display = "none";
   document.getElementById("back-button").style.display = "none";
-  showLoader(false); // ⛔ hides loader if active
+  showLoader(false);
   resetGame();
 }
 
@@ -533,9 +537,14 @@ function launchMultiplayer() {
   document.getElementById("player-role").innerText = playerRole;
   document.getElementById("current-room").innerText = roomId;
 
+  const avatar = document.getElementById("player-avatar");
   if (playerRole === "player1") {
+    avatar.src = "avatar1.png";
     showLoader("⏳ Waiting for Player 2 to join...");
+  } else {
+    avatar.src = "avatar2.png";
   }
+  document.getElementById("avatar-section").style.display = "block";
 
   db.ref("rooms/" + roomId).on("value", snap => {
     const data = snap.val();
@@ -620,8 +629,7 @@ function updateLeaderboard() {
 }
 
 function checkAchievements() {
-  const aDiv = document.getElementById("achievement"),
-        msgs = [];
+  const aDiv = document.getElementById("achievement"), msgs = [];
   if (!achievements.firstWin && wins >= 1) {
     achievements.firstWin = true;
     msgs.push("🏆 First Win!");
@@ -686,12 +694,13 @@ function toggleMusic() {
     btn.textContent = "🔇 Unmute Music";
   }
 }
+
+// ---------- EMOJI CLICK ANIMATION ----------
 document.querySelectorAll('.emoji').forEach(emoji => {
   emoji.addEventListener('click', () => {
     emoji.classList.add('clicked');
     setTimeout(() => {
       emoji.classList.remove('clicked');
-    }, 300); // Reset after animation
+    }, 300);
   });
 });
-
