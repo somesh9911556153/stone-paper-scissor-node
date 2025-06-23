@@ -217,7 +217,7 @@ h1 {
   font-size: 3.5rem;
   display: inline-block;
   transition: transform 0.3s ease-in-out;
-  cursor: default;
+  cursor: pointer;
   animation: floatUpDown 4s ease-in-out infinite;
 }
 @keyframes floatUpDown {
@@ -225,7 +225,10 @@ h1 {
   50%  { transform: translateY(-25px); }
   100% { transform: translateY(0); }
 }
-
+.emoji.clicked {
+  animation: none;
+  transform: scale(1.4) rotate(10deg);
+}
 .emoji:hover {
   transform: scale(1.3) rotate(10deg);
 }
