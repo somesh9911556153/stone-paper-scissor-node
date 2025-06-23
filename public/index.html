@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -79,3 +79,110 @@
 </body>
 </html>
 
+ -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stone Paper Scissor</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+     background: rgba(0,0,0,0.6); color: #00fff0; font-size: 2rem;
+     display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    🔄 Connecting to room...
+  </div>
+
+  <div class="game-container">
+    <div class="main-content">
+      <h1>Stone Paper Scissor</h1>
+      <button id="music-toggle-btn" onclick="toggleMusic()">🔊 Mute Music</button>
+
+      <button id="back-button" onclick="goBack()" style="display: none;">⬅ Back</button>
+
+      <div class="emoji-banner">
+        <span class="emoji">🗿</span>
+        <span class="emoji">📄</span>
+        <span class="emoji">✂️</span>
+      </div>
+
+      <!-- MODE SELECTION -->
+      <div id="mode-selection">
+        <button onclick="selectMode('bot')">Play with Computer</button>
+        <button onclick="selectMode('online')">Play Online with Friend</button>
+      </div>
+
+      <!-- ROOM CONTROLS -->
+      <div id="room-controls" style="display: none;">
+        <input type="text" id="room-id" placeholder="Enter Room Code" />
+        <button onclick="createRoom()">Create Room</button>
+        <button onclick="joinRoom()">Join Room</button>
+      </div>
+
+      <!-- GAME UI -->
+      <div id="game-ui" style="display:none;">
+        <div class="modes">
+          <p id="mode-status"></p>
+          <p id="player-role-label" style="display:none;">
+            You are: <span id="player-role"></span>
+          </p>
+          <p>Room: <span id="current-room"></span></p>
+        </div>
+
+        <div class="button">
+          <button onclick="handleChoice('stone')">🪨 Stone</button>
+          <button onclick="handleChoice('paper')">📄 Paper</button>
+          <button onclick="handleChoice('scissor')">✂️ Scissor</button>
+          <button onclick="resetGame()">🔄 Reset</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="banter"></div>
+
+        <div class="leaderboard-inline" style="display:none;">
+          <h2>Leaderboard</h2>
+          <p>Wins: <span id="wins">0</span></p>
+          <p>Losses: <span id="losses">0</span></p>
+          <p>Draws: <span id="draws">0</span></p>
+        </div>
+
+        <button id="toggle-leaderboard-btn"
+                class="toggle-leaderboard"
+                style="display: none; margin: 0.5rem auto;">
+          Show Leaderboard
+        </button>
+
+        <div id="achievement"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBn7lHxrH7Xe4yBN6KLc3k5hwsC9rfXQ",
+      authDomain: "online-stone-paper-scissor.firebaseapp.com",
+      projectId: "online-stone-paper-scissor",
+      storageBucket: "online-stone-paper-scissor.appspot.com",
+      messagingSenderId: "99731108745",
+      appId: "1:99731108745:web:359bf960e2ff8dee8c6758",
+      measurementId: "G-5S21K36TEX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
+
+  <script src="script.js"></script>
+</body>
+<audio id="bg-music" src="music.mp3" autoplay loop></audio>
+
+</html>
