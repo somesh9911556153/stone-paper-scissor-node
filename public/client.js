@@ -544,7 +544,7 @@ function launchMultiplayer() {
     avatar.src = "avtaar1.jpeg";
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
-    avatar.src = "avtaar2.jpeg";
+    avatar.src = "avtaar2.avif";
     showLoader(false);
   }
   document.getElementById("avatar-section").style.display = "block";
