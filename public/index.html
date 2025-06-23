@@ -81,7 +81,7 @@
 
  -->
 
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -93,18 +93,18 @@
 </head>
 <body>
 
-  <!-- Loader -->
+  <!-- Loader (hidden & empty by default, controlled via JS) -->
   <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
      background: rgba(0,0,0,0.6); color: #00fff0; font-size: 2rem;
      display: flex; align-items: center; justify-content: center; z-index: 9999;">
-    🔄 Connecting to room...
   </div>
 
   <div class="game-container">
     <div class="main-content">
       <h1>Stone Paper Scissor</h1>
-      <button id="music-toggle-btn" onclick="toggleMusic()">🔊 Mute Music</button>
 
+      <!-- Mute + Back buttons (top-right) -->
+      <button id="music-toggle-btn" onclick="toggleMusic()">🔊 Mute Music</button>
       <button id="back-button" onclick="goBack()" style="display: none;">⬅ Back</button>
 
       <div class="emoji-banner">
@@ -113,20 +113,20 @@
         <span class="emoji">✂️</span>
       </div>
 
-      <!-- MODE SELECTION -->
+      <!-- Mode Selection -->
       <div id="mode-selection">
         <button onclick="selectMode('bot')">Play with Computer</button>
         <button onclick="selectMode('online')">Play Online with Friend</button>
       </div>
 
-      <!-- ROOM CONTROLS -->
+      <!-- Room Controls -->
       <div id="room-controls" style="display: none;">
         <input type="text" id="room-id" placeholder="Enter Room Code" />
         <button onclick="createRoom()">Create Room</button>
         <button onclick="joinRoom()">Join Room</button>
       </div>
 
-      <!-- GAME UI -->
+      <!-- Game UI -->
       <div id="game-ui" style="display:none;">
         <div class="modes">
           <p id="mode-status"></p>
@@ -146,6 +146,7 @@
         <div id="result"></div>
         <div id="banter"></div>
 
+        <!-- Leaderboard -->
         <div class="leaderboard-inline" style="display:none;">
           <h2>Leaderboard</h2>
           <p>Wins: <span id="wins">0</span></p>
@@ -164,7 +165,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
   <script>
@@ -181,8 +182,10 @@
     const db = firebase.database();
   </script>
 
+  <!-- Game Logic -->
   <script src="script.js"></script>
-</body>
-<audio id="bg-music" src="music.mp3" autoplay loop></audio>
 
+  <!-- Background Music -->
+  <audio id="bg-music" src="music.mp3" autoplay loop></audio>
+</body>
 </html>
