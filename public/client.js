@@ -462,7 +462,7 @@ function selectMode(selectedMode) {
     document.getElementById("game-ui").style.display = "block";
 
     const avatar = document.getElementById("player-avatar");
-    avatar.src = "avatar1.png";
+    avatar.src = "avtaar1.png";
     document.getElementById("avatar-section").style.display = "block";
   } else {
     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
@@ -544,7 +544,7 @@ function launchMultiplayer() {
     avatar.src = "avtaar1.png";
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
-    avatar.src = "avtaar2.avif";
+    avatar.src = "avtaar2.png";
     showLoader(false);
   }
   document.getElementById("avatar-section").style.display = "block";
