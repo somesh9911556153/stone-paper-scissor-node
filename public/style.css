@@ -114,8 +114,8 @@ h1 {
   transition: background 0.2s, transform 0.2s;
 }
 .button button:hover {
-  background: #fd2414;
-  color: #fff;
+  background: #00FFFF;
+  color: #1E1E2F;
   transform: scale(1.05);
 }
 
@@ -202,8 +202,8 @@ h1 {
 }
 
 #back-button:hover {
-  background-color: #00fff0;
-  color: #00FFFF;
+  background-color: #fd2414;
+  color: #fff;
   transform: scale(1.05);
 }
 .emoji-banner {
