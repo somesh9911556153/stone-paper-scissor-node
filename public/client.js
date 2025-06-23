@@ -675,3 +675,12 @@ function toggleMusic() {
     btn.textContent = "🔇 Unmute Music";
   }
 }
+document.querySelectorAll('.emoji').forEach(emoji => {
+  emoji.addEventListener('click', () => {
+    emoji.classList.add('clicked');
+    setTimeout(() => {
+      emoji.classList.remove('clicked');
+    }, 300); // Reset after animation
+  });
+});
+
