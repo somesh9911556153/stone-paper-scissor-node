@@ -114,8 +114,8 @@ h1 {
   transition: background 0.2s, transform 0.2s;
 }
 .button button:hover {
-  background: #00FFFF;
-  color: #1E1E2F;
+  background: #fd2414;
+  color: #fff;
   transform: scale(1.05);
 }
 
