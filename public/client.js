@@ -469,6 +469,7 @@ function selectMode(selectedMode) {
     document.getElementById("room-controls").style.display = "block";
     document.getElementById("game-ui").style.display = "none";
     document.getElementById("avatar-section").style.display = "none";
+    showLoader(false); // Important: no loader yet
   }
 }
 
@@ -544,6 +545,7 @@ function launchMultiplayer() {
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
     avatar.src = "avatar2.png";
+    showLoader(false);
   }
   document.getElementById("avatar-section").style.display = "block";
 
