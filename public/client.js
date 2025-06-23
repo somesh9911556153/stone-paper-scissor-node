@@ -541,10 +541,10 @@ function launchMultiplayer() {
 
   const avatar = document.getElementById("player-avatar");
   if (playerRole === "player1") {
-    avatar.src = "avatar1.png";
+    avatar.src = "avtaar1.jpeg";
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
-    avatar.src = "avatar2.png";
+    avatar.src = "avtaar2.jpeg";
     showLoader(false);
   }
   document.getElementById("avatar-section").style.display = "block";
