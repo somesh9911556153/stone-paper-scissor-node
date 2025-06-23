@@ -437,6 +437,7 @@ let achievements = {
 
 // ---------- MODE SELECTION ----------
 function selectMode(selectedMode) {
+  console.log("Mode selected:", selectedMode);
   const bgMusic = document.getElementById("bg-music");
 
   if (bgMusic && bgMusic.paused) {
@@ -539,10 +540,10 @@ function launchMultiplayer() {
 
   const avatar = document.getElementById("player-avatar");
   if (playerRole === "player1") {
-    avatar.src = "avtaar1.jpeg";
+    avatar.src = "avatar1.png";
     showLoader("⏳ Waiting for Player 2 to join...");
   } else {
-    avatar.src = "avvtaar2.avif";
+    avatar.src = "avatar2.png";
   }
   document.getElementById("avatar-section").style.display = "block";
 
@@ -629,7 +630,8 @@ function updateLeaderboard() {
 }
 
 function checkAchievements() {
-  const aDiv = document.getElementById("achievement"), msgs = [];
+  const aDiv = document.getElementById("achievement"),
+        msgs = [];
   if (!achievements.firstWin && wins >= 1) {
     achievements.firstWin = true;
     msgs.push("🏆 First Win!");
