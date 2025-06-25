@@ -708,3 +708,93 @@ document.querySelectorAll('.emoji').forEach(emoji => {
     }, 300);
   });
 });
+let currentRoomId = null;
+let localUsername = "Player";
+let opponentUsername = "Waiting...";
+
+// Save and display profile
+function toggleProfile() {
+  const section = document.getElementById('profile-section');
+  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveProfile() {
+  const name = document.getElementById('username-input').value.trim();
+  if (name) {
+    localUsername = name;
+    document.getElementById('local-username').innerText = localUsername;
+    if (currentRoomId) {
+      db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
+    }
+  }
+  toggleProfile();
+}
+
+// Set up listener for opponent username
+function listenToOpponentName(roomId) {
+  db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+    const players = snapshot.val();
+    for (const id in players) {
+      if (id !== playerId && players[id].name) {
+        opponentUsername = players[id].name;
+        document.getElementById('opponent-username').innerText = opponentUsername;
+      }
+    }
+  });
+}
+
+// Example stub: modify this during actual room creation/joining
+let playerId = "player1";
+
+function createRoom() {
+  currentRoomId = Math.random().toString(36).substring(2, 8);
+  playerId = "player1";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername
+  });
+  listenToOpponentName(currentRoomId);
+  document.getElementById('current-room').innerText = currentRoomId;
+  document.getElementById('mode-selection').style.display = 'none';
+  document.getElementById('game-ui').style.display = 'block';
+}
+
+function joinRoom() {
+  const input = document.getElementById('room-id').value.trim();
+  if (input) {
+    currentRoomId = input;
+    playerId = "player2";
+    db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+      name: localUsername
+    });
+    listenToOpponentName(currentRoomId);
+    document.getElementById('current-room').innerText = currentRoomId;
+    document.getElementById('mode-selection').style.display = 'none';
+    document.getElementById('game-ui').style.display = 'block';
+  }
+}
+
+// Placeholder stubs for rest of logic
+function selectMode(mode) {
+  document.getElementById('mode-selection').style.display = 'none';
+  if (mode === 'online') {
+    document.getElementById('room-controls').style.display = 'block';
+  }
+}
+
+function toggleMusic() {
+  const music = document.getElementById('bg-music');
+  music.muted = !music.muted;
+  document.getElementById('music-toggle-btn').innerText = music.muted ? "🔇 Unmute Music" : "🔊 Mute Music";
+}
+
+function goBack() {
+  window.location.reload();
+}
+
+function handleChoice(choice) {
+  console.log(`${localUsername} chose ${choice}`);
+}
+
+function resetGame() {
+  console.log("Resetting game...");
+}
