@@ -415,158 +415,147 @@
 // } 
 
 
-// ---------- CONFIG & STATE ----------
 const choices = ["stone", "paper", "scissor"];
 let mode = null,
-  roomId = "",
-  playerRole = "";
-let wins = 0,
-  losses = 0,
-  draws = 0;
-
-let currentRoomId = null;
-let localUsername = "Player";
-let opponentUsername = "Waiting...";
-let playerId = "player1";
+    currentRoomId = null,
+    playerId = "",
+    localUsername = "Player",
+    opponentUsername = "Waiting...",
+    wins = 0, losses = 0, draws = 0;
 
 const gameover = new Audio("gameover.mp3"),
-  winSound = new Audio("victory.mp3"),
-  drawSound = new Audio("draw.mp3");
+      winSound = new Audio("victory.mp3"),
+      drawSound = new Audio("draw.mp3");
 
-const winBanter = [
-    "You're on fire! 🔥",
-    "Keep going, champion!",
-    "Nice move!",
-    "Epic battle!",
-    "Unstoppable!",
-  ],
-  loseBanter = [
-    "Better luck next time!",
-    "Try again!",
-    "Close one!",
-    "Oops!",
-  ],
-  drawBanter = [
-    "Try again!",
-    "Even match!",
-    "So close!",
-    "Neck and neck!",
-  ];
+const winBanter  = ["You're on fire! 🔥","Keep going, champion!","Nice move!","Epic battle!","Unstoppable!"],
+      loseBanter = ["Better luck next time!","Try again!","Close one!","Oops!"],
+      drawBanter = ["Try again!","Even match!","So close!","Neck and neck!"];
 
 let achievements = {
   firstWin: false,
   fiveWins: false,
   firstDraw: false,
-  threeLosses: false,
+  threeLosses: false
 };
 
-// ---------- PROFILE MANAGEMENT ----------
+function selectMode(selectedMode) {
+  mode = selectedMode;
+  document.getElementById("mode-selection").style.display = "none";
+  document.getElementById("back-button").style.display = "inline-block";
+  document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
+
+  if (mode === "bot") {
+    document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
+    document.getElementById("game-ui").style.display = "block";
+    document.getElementById("room-controls").style.display = "none";
+
+    document.getElementById("player-avatar").src = "avtaar1.png";
+    document.getElementById("avatar-section").style.display = "block";
+    document.getElementById("opponent-avatar-section").style.display = "none";
+    document.getElementById("local-username").innerText = localUsername;
+  } else {
+    document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
+    document.getElementById("room-controls").style.display = "block";
+    document.getElementById("avatar-section").style.display = "none";
+    document.getElementById("opponent-avatar-section").style.display = "none";
+  }
+
+  showLoader(false); // Clear loader on entry
+}
+
+function createRoom() {
+  currentRoomId = Math.random().toString(36).substring(2, 8);
+  playerId = "player1";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername
+  });
+
+  showLoader("⏳ Waiting for Player 2 to join...");
+  launchGameUI();
+  listenToOpponentName(currentRoomId);
+}
+
+function joinRoom() {
+  const input = document.getElementById("room-id").value.trim();
+  if (!input) return alert("Please enter a Room ID");
+
+  currentRoomId = input;
+  playerId = "player2";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername
+  });
+
+  showLoader("🔌 Connecting...");
+  launchGameUI();
+  listenToOpponentName(currentRoomId);
+}
+
+function launchGameUI() {
+  document.getElementById("room-controls").style.display = "none";
+  document.getElementById("game-ui").style.display = "block";
+  document.getElementById("avatar-section").style.display = "block";
+  document.getElementById("player-avatar").src = "avtaar1.png";
+  document.getElementById("local-username").innerText = localUsername;
+
+  document.getElementById("opponent-avatar-section").style.display = "block";
+  document.getElementById("opponent-avatar").src = "avtaar2.png";
+  document.getElementById("opponent-username").innerText = opponentUsername;
+
+  document.getElementById("current-room").innerText = currentRoomId;
+}
+
+function listenToOpponentName(roomId) {
+  db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+    const players = snapshot.val();
+    for (const id in players) {
+      if (id !== playerId && players[id].name) {
+        opponentUsername = players[id].name;
+        document.getElementById('opponent-username').innerText = opponentUsername;
+      }
+    }
+    showLoader(false); // Hide loader once opponent joins
+  });
+}
+
 function toggleProfile() {
-  const section = document.getElementById("profile-section");
-  section.style.display = section.style.display === "none" ? "block" : "none";
+  const section = document.getElementById('profile-section');
+  section.style.display = section.style.display === 'none' ? 'block' : 'none';
 }
 
 function saveProfile() {
-  const name = document.getElementById("username-input").value.trim();
+  const name = document.getElementById('username-input').value.trim();
   if (name) {
     localUsername = name;
-    document.getElementById("local-username").innerText = localUsername;
-    if (currentRoomId) {
+    document.getElementById('local-username').innerText = localUsername;
+    if (currentRoomId && playerId) {
       db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
     }
   }
   toggleProfile();
 }
 
-function listenToOpponentName(roomId) {
-  db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
-    const players = snapshot.val();
-    for (const id in players) {
-      if (id !== playerId && players[id].name) {
-        opponentUsername = players[id].name;
-        document.getElementById("opponent-username").innerText = opponentUsername;
-        document.getElementById("opponent-avatar").src = "avtaar2.png";
-        document.getElementById("opponent-section").style.display = "block";
-      }
-    }
-  });
-}
-
-// ---------- MODE SELECTION ----------
-function selectMode(selectedMode) {
-  mode = selectedMode;
-  document.getElementById("mode-selection").style.display = "none";
-  document.getElementById("back-button").style.display = "inline-block";
-
-  if (mode === "bot") {
-    document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
-    document.getElementById("room-controls").style.display = "none";
-    document.getElementById("game-ui").style.display = "block";
-
-    document.getElementById("local-username").innerText = localUsername;
-    document.getElementById("player-avatar").src = "avtaar1.png";
-    document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("opponent-section").style.display = "none";
+function showLoader(messageOrFalse) {
+  const loader = document.getElementById("loading");
+  if (!loader) return;
+  if (messageOrFalse) {
+    loader.innerText = messageOrFalse;
+    loader.style.display = "flex";
   } else {
-    document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
-    document.getElementById("room-controls").style.display = "block";
-    document.getElementById("game-ui").style.display = "none";
-    document.getElementById("avatar-section").style.display = "none";
+    loader.innerText = "";
+    loader.style.display = "none";
   }
 }
 
-function goBack() {
-  window.location.reload();
-}
-
-// ---------- GAME CHOICE HANDLING ----------
 function handleChoice(choice) {
   console.log(`${localUsername} chose ${choice}`);
 }
 
-function resetGame() {
-  console.log("Resetting game...");
-}
-
-// ---------- MUSIC TOGGLE ----------
 function toggleMusic() {
-  const music = document.getElementById("bg-music");
+  const music = document.getElementById('bg-music');
   music.muted = !music.muted;
-  document.getElementById("music-toggle-btn").innerText = music.muted
-    ? "🔇 Unmute Music"
-    : "🔊 Mute Music";
+  document.getElementById('music-toggle-btn').innerText = music.muted ? "🔇 Unmute Music" : "🔊 Mute Music";
 }
 
-// ---------- ROOM FUNCTIONS ----------
-function createRoom() {
-  currentRoomId = Math.random().toString(36).substring(2, 8);
-  playerId = "player1";
-  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
-    name: localUsername,
-  });
-  listenToOpponentName(currentRoomId);
-  document.getElementById("current-room").innerText = currentRoomId;
-  document.getElementById("room-controls").style.display = "none";
-  document.getElementById("game-ui").style.display = "block";
-  document.getElementById("player-avatar").src = "avtaar1.png";
-  document.getElementById("avatar-section").style.display = "block";
-  document.getElementById("local-username").innerText = localUsername;
-}
-
-function joinRoom() {
-  const input = document.getElementById("room-id").value.trim();
-  if (input) {
-    currentRoomId = input;
-    playerId = "player2";
-    db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
-      name: localUsername,
-    });
-    listenToOpponentName(currentRoomId);
-    document.getElementById("current-room").innerText = currentRoomId;
-    document.getElementById("room-controls").style.display = "none";
-    document.getElementById("game-ui").style.display = "block";
-    document.getElementById("player-avatar").src = "avtaar1.png";
-    document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("local-username").innerText = localUsername;
-  }
+function goBack() {
+  window.location.reload();
 }
