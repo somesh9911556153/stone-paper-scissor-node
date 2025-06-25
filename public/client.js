@@ -293,6 +293,7 @@ function goBack() {
   document.getElementById("back-button").style.display = "none";
   document.getElementById("profile-display").style.display = "flex";
   document.getElementById("main-heading").style.display = "block";
+  document.getElementById("toggle-leaderboard-btn").style.display = "none"; 
 }
 
 function showLoader(messageOrFalse) {
