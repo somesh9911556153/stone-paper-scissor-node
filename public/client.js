@@ -1,427 +1,13 @@
-// const socket = io();
-
-// let roomId = "";
-
-// function joinRoom() {
-//   roomId = document.getElementById("room-input").value;
-//   socket.emit("join-room", roomId);
-//   document.getElementById("status").innerText = "Waiting for opponent...";
-// }
-
-// socket.on("start-game", () => {
-//   document.getElementById("game").style.display = "block";
-//   document.getElementById("status").innerText = "Game Started!";
-// });
-
-// function sendChoice(choice) {
-//   socket.emit("submit-choice", { roomId, choice });
-// }
-
-// socket.on("round-result", ({ choices, result }) => {
-//   document.getElementById("status").innerText =
-//     `You chose: ${choices[socket.id]}\nOpponent chose: ${
-//       Object.entries(choices).find(([id]) => id !== socket.id)[1]
-//     }\n${result}`;
-// });
-
-// socket.on("player-left", () => {
-//   document.getElementById("status").innerText = "Opponent left the game.";
-// });
-
-
-
-// // ---------- CONFIG & STATE ----------
-// const socket = io();
-// const choices = ["stone", "paper", "scissor"];
-// let mode = null,
-//     roomId = "",
-//     wins = 0,
-//     losses = 0,
-//     draws = 0;
-
-// const gameover = new Audio("gameover.mp3"),
-//       winSound = new Audio("victory.mp3"),
-//       drawSound = new Audio("draw.mp3");
-
-// const winBanter  = ["You're on fire! 🔥","Keep going, champion!","Nice move!","Epic battle!","Unstoppable!"],
-//       loseBanter = ["Better luck next time!","Try again!","Close one!","Oops!"],
-//       drawBanter = ["Try again!","Even match!","So close!","Neck and neck!"];
-
-// let achievements = {
-//   firstWin: false,
-//   fiveWins: false,
-//   firstDraw: false,
-//   threeLosses: false
-// };
-
-// // ---------- MODE SELECTION ----------
-// function selectMode(selectedMode) {
-//   mode = selectedMode;
-
-//   document.getElementById("mode-selection").style.display = "none";
-//   document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
-
-//   if (mode === "bot") {
-//     document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
-//     document.getElementById("room-controls").style.display = "none";
-//     document.getElementById("game-ui").style.display = "block";
-//   } else {
-//     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
-//     document.getElementById("room-controls").style.display = "block";
-//     document.getElementById("game-ui").style.display = "none";
-//   }
-// }
-
-// // ---------- BUTTON HANDLER ----------
-// function handleChoice(choice) {
-//   if (mode === "bot") playWithBot(choice);
-//   else sendChoice(choice);
-// }
-
-// // ---------- BOT MODE ----------
-// function playWithBot(userChoice) {
-//   const comp = choices[Math.floor(Math.random() * choices.length)];
-//   const res = getResult(userChoice, comp);
-//   showResult(userChoice, comp, res);
-// }
-
-// // ---------- ONLINE MODE (Socket.IO) ----------
-// function joinRoom() {
-//   roomId = document.getElementById("room-id").value.trim();
-//   if (!roomId) return alert("Enter room code to join");
-//   socket.emit("join-room", roomId);
-//   document.getElementById("room-controls").style.display = "none";
-//   document.getElementById("status").innerText = "Waiting for opponent...";
-// }
-
-// socket.on("start-game", () => {
-//   document.getElementById("game-ui").style.display = "block";
-//   document.getElementById("status").innerText = "Game Started!";
-// });
-
-// function sendChoice(choice) {
-//   if (!roomId) return alert("Join a room first");
-//   socket.emit("submit-choice", { roomId, choice });
-// }
-
-// socket.on("round-result", ({ choices, result }) => {
-//   const userChoice = choices[socket.id];
-//   const opponentChoice = Object.entries(choices).find(([id]) => id !== socket.id)[1];
-//   showResult(userChoice, opponentChoice, result);
-// });
-
-// socket.on("player-left", () => {
-//   document.getElementById("status").innerText = "Opponent left the game.";
-// });
-
-// // ---------- SHARED LOGIC ----------
-// function getResult(u, o) {
-//   if (u === o) return "It's a draw!";
-//   if ((u === "stone" && o === "scissor") ||
-//       (u === "paper" && o === "stone") ||
-//       (u === "scissor" && o === "paper")) {
-//     return "You win!";
-//   }
-//   return "You lose!";
-// }
-
-// function showResult(u, o, res) {
-//   const rd = document.getElementById("result"),
-//         bd = document.getElementById("banter");
-
-//   let html = `You chose: ${u}<br>Opponent chose: ${o}<br>${res}`;
-//   if (res === "You win!") {
-//     wins++;
-//     winSound.play();
-//     html += `<br><img src="excited.gif" style="width:100px;">`;
-//   } else if (res === "You lose!") {
-//     losses++;
-//     gameover.pause(); gameover.currentTime = 0; gameover.play();
-//     html += `<br><img src="you lose.png" style="width:80px;">`;
-//   } else {
-//     draws++;
-//     drawSound.play();
-//     html += `<br><img src="image.png" style="width:80px;">`;
-//   }
-
-//   rd.innerHTML = html;
-//   const banterArr = res === "You win!" ? winBanter : res === "You lose!" ? loseBanter : drawBanter;
-//   bd.innerText = banterArr[Math.floor(Math.random() * banterArr.length)];
-
-//   updateLeaderboard();
-//   checkAchievements();
-// }
-
-// function resetGame() {
-//   ["result", "banter", "achievement"].forEach(id => {
-//     document.getElementById(id).innerText = "";
-//   });
-//   wins = losses = draws = 0;
-//   achievements = {
-//     firstWin: false,
-//     fiveWins: false,
-//     firstDraw: false,
-//     threeLosses: false
-//   };
-//   updateLeaderboard();
-// }
-
-// function updateLeaderboard() {
-//   document.getElementById("wins").innerText = wins;
-//   document.getElementById("losses").innerText = losses;
-//   document.getElementById("draws").innerText = draws;
-// }
-
-// function checkAchievements() {
-//   const aDiv = document.getElementById("achievement"), msgs = [];
-//   if (!achievements.firstWin && wins >= 1) {
-//     achievements.firstWin = true;
-//     msgs.push("🏆 First Win!");
-//   }
-//   if (!achievements.fiveWins && wins >= 5) {
-//     achievements.fiveWins = true;
-//     msgs.push("🏆 5 Wins!");
-//   }
-//   if (!achievements.firstDraw && draws >= 1) {
-//     achievements.firstDraw = true;
-//     msgs.push("🤝 First Draw!");
-//   }
-//   if (!achievements.threeLosses && losses >= 3) {
-//     achievements.threeLosses = true;
-//     msgs.push("😅 3 Losses!");
-//   }
-
-//   if (msgs.length) {
-//     aDiv.innerHTML = msgs.join("<br>");
-//     setTimeout(() => { aDiv.innerHTML = ""; }, 3000);
-//   }
-// }
-
-// // ---------- TOGGLE INLINE LEADERBOARD ----------
-// const lbBtn = document.getElementById("toggle-leaderboard-btn"),
-//       lbDiv = document.querySelector(".leaderboard-inline");
-
-// lbBtn.addEventListener("click", () => {
-//   const hidden = getComputedStyle(lbDiv).display === "none";
-//   lbDiv.style.display = hidden ? "block" : "none";
-//   lbBtn.textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
-// });
-
-
-
-// // ---------- CONFIG & STATE ----------
-// const socket = io();
-// const choices = ["stone", "paper", "scissor"];
-// let mode = null,
-//     roomId = "",
-//     wins = 0,
-//     losses = 0,
-//     draws = 0;
-
-// const gameover = new Audio("gameover.mp3"),
-//       winSound = new Audio("victory.mp3"),
-//       drawSound = new Audio("draw.mp3");
-
-// const winBanter  = ["You're on fire! 🔥","Keep going, champion!","Nice move!","Epic battle!","Unstoppable!"],
-//       loseBanter = ["Better luck next time!","Try again!","Close one!","Oops!"],
-//       drawBanter = ["Try again!","Even match!","So close!","Neck and neck!"];
-
-// let achievements = {
-//   firstWin: false,
-//   fiveWins: false,
-//   firstDraw: false,
-//   threeLosses: false
-// };
-
-// // ---------- MODE SELECTION ----------
-// function selectMode(selectedMode) {
-//   mode = selectedMode;
-
-//   document.getElementById("mode-selection").style.display = "none";
-//   document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
-//   document.getElementById("back-button").style.display = "inline-block"; // Show back button
-
-//   if (mode === "bot") {
-//     document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
-//     document.getElementById("room-controls").style.display = "none";
-//     document.getElementById("game-ui").style.display = "block";
-//   } else {
-//     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
-//     document.getElementById("room-controls").style.display = "block";
-//     document.getElementById("game-ui").style.display = "none";
-//   }
-// }
-
-// // ---------- BUTTON HANDLER ----------
-// function handleChoice(choice) {
-//   if (mode === "bot") playWithBot(choice);
-//   else sendChoice(choice);
-// }
-
-// // ---------- BOT MODE ----------
-// function playWithBot(userChoice) {
-//   const comp = choices[Math.floor(Math.random() * choices.length)];
-//   const res = getResult(userChoice, comp);
-//   showResult(userChoice, comp, res);
-// }
-
-// // ---------- ONLINE MODE (Socket.IO) ----------
-// function joinRoom() {
-//   roomId = document.getElementById("room-id").value.trim();
-//   if (!roomId) return alert("Enter room code to join");
-//   socket.emit("join-room", roomId);
-//   document.getElementById("room-controls").style.display = "none";
-//   document.getElementById("status").innerText = "Waiting for opponent...";
-// }
-
-// function sendChoice(choice) {
-//   if (!roomId) return alert("Join a room first");
-//   socket.emit("submit-choice", { roomId, choice });
-// }
-
-// socket.on("start-game", () => {
-//   document.getElementById("game-ui").style.display = "block";
-//   document.getElementById("status").innerText = "Game Started!";
-// });
-
-// socket.on("round-result", ({ choices, result }) => {
-//   const userChoice = choices[socket.id];
-//   const opponentChoice = Object.entries(choices).find(([id]) => id !== socket.id)[1];
-//   let finalResult = "It's a draw!";
-
-//   if ((userChoice === "stone" && opponentChoice === "scissor") ||
-//       (userChoice === "paper" && opponentChoice === "stone") ||
-//       (userChoice === "scissor" && opponentChoice === "paper")) {
-//     finalResult = "You win!";
-//   } else if (userChoice !== opponentChoice) {
-//     finalResult = "You lose!";
-//   }
-
-//   showResult(userChoice, opponentChoice, finalResult);
-// });
-
-// socket.on("player-left", () => {
-//   document.getElementById("status").innerText = "Opponent left the game.";
-// });
-
-// // ---------- SHARED LOGIC ----------
-// function getResult(u, o) {
-//   if (u === o) return "It's a draw!";
-//   if ((u === "stone" && o === "scissor") ||
-//       (u === "paper" && o === "stone") ||
-//       (u === "scissor" && o === "paper")) {
-//     return "You win!";
-//   }
-//   return "You lose!";
-// }
-
-// function showResult(u, o, res) {
-//   const rd = document.getElementById("result"),
-//         bd = document.getElementById("banter"),
-//         aDiv = document.getElementById("achievement");
-
-//   let html = `You chose: ${u}<br>Opponent chose: ${o}<br>${res}`;
-
-//   if (res === "You win!") {
-//     wins++;
-//     winSound.play();
-//     html += `<br><img src="excited.gif" style="width:100px;">`;
-//   } else if (res === "You lose!") {
-//     losses++;
-//     gameover.pause(); gameover.currentTime = 0; gameover.play();
-//     html += `<br><img src="you lose.png" style="width:80px;">`;
-//   } else {
-//     draws++;
-//     drawSound.play();
-//     html += `<br><img src="image.png" style="width:80px;">`;
-//   }
-
-//   rd.innerHTML = html;
-//   const banterArr = res === "You win!" ? winBanter : res === "You lose!" ? loseBanter : drawBanter;
-//   bd.innerText = banterArr[Math.floor(Math.random() * banterArr.length)];
-
-//   updateLeaderboard();
-//   checkAchievements();
-// }
-
-// function resetGame() {
-//   ["result", "banter", "achievement"].forEach(id => {
-//     document.getElementById(id).innerText = "";
-//   });
-//   wins = losses = draws = 0;
-//   achievements = {
-//     firstWin: false,
-//     fiveWins: false,
-//     firstDraw: false,
-//     threeLosses: false
-//   };
-//   updateLeaderboard();
-// }
-
-// function updateLeaderboard() {
-//   document.getElementById("wins").innerText = wins;
-//   document.getElementById("losses").innerText = losses;
-//   document.getElementById("draws").innerText = draws;
-// }
-
-// function checkAchievements() {
-//   const aDiv = document.getElementById("achievement"), msgs = [];
-//   if (!achievements.firstWin && wins >= 1) {
-//     achievements.firstWin = true;
-//     msgs.push("🏆 First Win!");
-//   }
-//   if (!achievements.fiveWins && wins >= 5) {
-//     achievements.fiveWins = true;
-//     msgs.push("🏆 5 Wins!");
-//   }
-//   if (!achievements.firstDraw && draws >= 1) {
-//     achievements.firstDraw = true;
-//     msgs.push("🤝 First Draw!");
-//   }
-//   if (!achievements.threeLosses && losses >= 3) {
-//     achievements.threeLosses = true;
-//     msgs.push("😅 3 Losses!");
-//   }
-
-//   if (msgs.length) {
-//     aDiv.innerHTML = msgs.join("<br>");
-//     aDiv.style.display = "block";
-//     aDiv.style.animation = "popInOut 3s ease-in-out";
-//     setTimeout(() => {
-//       aDiv.innerHTML = "";
-//       aDiv.style.display = "none";
-//     }, 3000);
-//   }
-// }
-
-// // ---------- TOGGLE INLINE LEADERBOARD ----------
-// const lbBtn = document.getElementById("toggle-leaderboard-btn"),
-//       lbDiv = document.querySelector(".leaderboard-inline");
-
-// lbBtn.addEventListener("click", () => {
-//   const hidden = getComputedStyle(lbDiv).display === "none";
-//   lbDiv.style.display = hidden ? "block" : "none";
-//   lbBtn.textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
-// });
-
-// // ---------- BACK BUTTON ----------
-// function goBack() {
-//   document.getElementById("game-ui").style.display = "none";
-//   document.getElementById("room-controls").style.display = "none";
-//   document.getElementById("mode-selection").style.display = "flex";
-//   document.getElementById("toggle-leaderboard-btn").style.display = "none";
-//   document.getElementById("back-button").style.display = "none";
-//   resetGame();
-// } 
-
-
+// --- CONFIG & STATE ---
 const choices = ["stone", "paper", "scissor"];
 let mode = null,
-    currentRoomId = null,
-    playerId = "",
-    localUsername = "Player",
-    opponentUsername = "Waiting...",
-    wins = 0, losses = 0, draws = 0;
+  currentRoomId = null,
+  playerId = "",
+  localUsername = "Player",
+  opponentUsername = "Waiting...",
+  wins = 0,
+  losses = 0,
+  draws = 0;
 
 const gameover = new Audio("gameover.mp3");
 const winSound = new Audio("victory.mp3");
@@ -438,134 +24,296 @@ let achievements = {
   threeLosses: false
 };
 
+let selectedAvatar = localStorage.getItem("avatar") || "avtaar1.png";
+let moveListenerAdded = false;
+
+// --- INITIAL LOAD ---
 window.addEventListener("load", () => {
   const loader = document.getElementById("loading");
   if (loader) loader.style.display = "none";
-
   const modeSelection = document.getElementById("mode-selection");
   if (modeSelection) modeSelection.style.display = "block";
+  document.getElementById("profile-display").style.display = "flex";
+  updateLeaderboard();
 });
 
+// --- AVATAR & PROFILE LOGIC ---
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".avatar-option").forEach(img => {
+    img.onclick = function () {
+      selectedAvatar = this.dataset.avatar;
+      highlightSelectedAvatar();
+    };
+  });
+  highlightSelectedAvatar();
+
+  const playerAvatar = document.getElementById("player-avatar");
+  if (playerAvatar) playerAvatar.src = selectedAvatar;
+
+  const storedName = localStorage.getItem("username");
+  if (storedName) {
+    localUsername = storedName;
+    document.getElementById("local-username").innerText = localUsername;
+  }
+
+  const profileAvatar = document.getElementById('profile-display-avatar');
+  const profileLabel = document.getElementById('profile-username-label');
+  if (profileAvatar) profileAvatar.onclick = openProfileModal;
+  if (profileLabel) profileLabel.onclick = openProfileModal;
+  updateProfileDisplay();
+});
+
+function highlightSelectedAvatar() {
+  document.querySelectorAll(".avatar-option").forEach(img => {
+    img.classList.toggle('selected', img.dataset.avatar === selectedAvatar);
+  });
+}
+
+function openProfileModal() {
+  document.getElementById('profile-modal').style.display = 'block';
+  document.getElementById('profile-username').value = localStorage.getItem('username') || "Player";
+  highlightSelectedAvatar();
+  document.getElementById('profile-username').focus();
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').style.display = 'none';
+}
+
+function saveProfile() {
+  const name = document.getElementById('profile-username').value.trim() || "Player";
+  localUsername = name;
+  localStorage.setItem('username', localUsername);
+  localStorage.setItem('avatar', selectedAvatar);
+
+  updateProfileDisplay();
+  document.getElementById('local-username').innerText = localUsername;
+  document.getElementById('player-avatar').src = selectedAvatar;
+  document.getElementById('player-avatar-inline').src = selectedAvatar;
+
+  closeProfileModal();
+
+  document.getElementById("mode-selection").style.display = "flex";
+  document.getElementById("profile-display").style.display = "flex";
+  document.getElementById("back-button").style.display = "none";
+  document.getElementById("game-ui").style.display = "none";
+  document.getElementById("room-controls").style.display = "none";
+  document.getElementById("avatar-section").style.display = "none";
+  document.getElementById("opponent-avatar-section").style.display = "none";
+
+  if (currentRoomId && playerId && typeof db !== "undefined") {
+    db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
+    db.ref(`rooms/${currentRoomId}/players/${playerId}/avatar`).set(selectedAvatar);
+  }
+}
+
+function updateProfileDisplay() {
+  const name = localStorage.getItem('username') || "Player";
+  const avatar = localStorage.getItem('avatar') || "avtaar1.png";
+  document.getElementById('profile-username-label').innerText = name;
+  document.getElementById('profile-display-avatar').src = avatar;
+}
+
+// --- MODE SELECTION ---
 function selectMode(selectedMode) {
   mode = selectedMode;
   document.getElementById("mode-selection").style.display = "none";
   document.getElementById("back-button").style.display = "inline-block";
-  document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
+  document.getElementById("profile-display").style.display = "none";
+  document.getElementById("main-heading").style.display = "none";
+
+  const avatar = localStorage.getItem("avatar") || "avtaar1.png";
+  document.getElementById("player-avatar-inline").src = avatar;
 
   if (mode === "bot") {
-    document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
+    opponentUsername = "Computer 🤖";
+    document.getElementById("mode-status").innerHTML = `
+      <span>${localUsername}</span> <img src="${avatar}" class="inline-avatar"> vs 
+      <span class="inline-avatar" style="font-size: 28px; margin: 0 10px;">🤖</span> <span>${opponentUsername}</span>`;
     document.getElementById("game-ui").style.display = "block";
+    document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
     document.getElementById("room-controls").style.display = "none";
-
-    document.getElementById("player-avatar").src = "avtaar1.png";
     document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("opponent-avatar-section").style.display = "none";
+    document.getElementById("opponent-avatar-section").style.display = "block";
+    document.getElementById("opponent-avatar").style.display = "none";
     document.getElementById("local-username").innerText = localUsername;
-    document.getElementById("opponent-username").innerText = "Computer 🤖";
+    document.getElementById("opponent-username").innerText = opponentUsername;
   } else {
-    document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
+    opponentUsername = "Waiting...";
+    document.getElementById("mode-status").innerHTML = `
+      <span>${localUsername}</span> <img src="${avatar}" class="inline-avatar"> vs 
+      <img src="loading.gif" class="inline-avatar"> <span>${opponentUsername}</span>`;
+    document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
     document.getElementById("room-controls").style.display = "block";
     document.getElementById("avatar-section").style.display = "none";
     document.getElementById("opponent-avatar-section").style.display = "none";
   }
 
-  showLoader(false); // Clear loader if left on
-}
-
-function createRoom() {
-  currentRoomId = Math.random().toString(36).substring(2, 8);
-  playerId = "player1";
-  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
-    name: localUsername
-  });
-
-  showLoader("⏳ Waiting for Player 2 to join...");
-  launchGameUI();
-  listenToOpponentName(currentRoomId);
-}
-
-function joinRoom() {
-  const input = document.getElementById("room-id").value.trim();
-  if (!input) return alert("Please enter a Room ID");
-
-  currentRoomId = input;
-  playerId = "player2";
-  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
-    name: localUsername
-  });
-
-  showLoader("🔌 Connecting...");
-  launchGameUI();
-  listenToOpponentName(currentRoomId);
-}
-
-function launchGameUI() {
-  document.getElementById("room-controls").style.display = "none";
-  document.getElementById("game-ui").style.display = "block";
-  document.getElementById("avatar-section").style.display = "block";
-  document.getElementById("player-avatar").src = "avtaar1.png";
-  document.getElementById("local-username").innerText = localUsername;
-
-  document.getElementById("opponent-avatar-section").style.display = "block";
-  document.getElementById("opponent-avatar").src = "avtaar2.png";
-  document.getElementById("opponent-username").innerText = opponentUsername;
-
-  document.getElementById("current-room").innerText = currentRoomId;
-}
-
-function listenToOpponentName(roomId) {
-  db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
-    const players = snapshot.val();
-    for (const id in players) {
-      if (id !== playerId && players[id].name) {
-        opponentUsername = players[id].name;
-        document.getElementById("opponent-username").innerText = opponentUsername;
-      }
-    }
-    showLoader(false); // Hide once opponent joins
-  });
-}
-
-function toggleProfile() {
-  const section = document.getElementById("profile-section");
-  section.style.display = section.style.display === "none" ? "block" : "none";
-}
-
-function saveProfile() {
-  const name = document.getElementById("username-input").value.trim();
-  if (name) {
-    localUsername = name;
-    document.getElementById("local-username").innerText = localUsername;
-    if (currentRoomId && playerId) {
-      db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
-    }
-  }
-  toggleProfile();
-}
-
-function showLoader(messageOrFalse) {
-  const loader = document.getElementById("loading");
-  if (!loader) return;
-  if (messageOrFalse) {
-    loader.innerText = messageOrFalse;
-    loader.style.display = "flex";
-  } else {
-    loader.innerText = "";
-    loader.style.display = "none";
+  showLoader(false);
+  const bgMusic = document.getElementById("bg-music");
+  if (bgMusic) {
+    bgMusic.play().catch(err => console.warn("Autoplay blocked:", err));
   }
 }
 
+// --- GAME LOGIC ---
 function handleChoice(choice) {
-  console.log(`${localUsername} chose ${choice}`);
-  // Add game logic here (for vs computer or multiplayer)
+  if (mode === "bot") {
+    const botChoice = choices[Math.floor(Math.random() * choices.length)];
+    showResult(localUsername, choice, opponentUsername, botChoice);
+  } else {
+    if (!currentRoomId || !playerId) return alert("Room or player not initialized.");
+
+    db.ref(`rooms/${currentRoomId}/moves/${playerId}`).set(choice);
+
+    if (!moveListenerAdded) {
+      db.ref(`rooms/${currentRoomId}/moves`).on("value", (snapshot) => {
+        const moves = snapshot.val();
+        if (!moves || !moves.player1 || !moves.player2) return;
+
+        const p1 = moves.player1;
+        const p2 = moves.player2;
+
+        const player1Name = playerId === "player1" ? localUsername : opponentUsername;
+        const player2Name = playerId === "player2" ? localUsername : opponentUsername;
+
+        const player1Choice = playerId === "player1" ? p1 : p2;
+        const player2Choice = playerId === "player1" ? p2 : p1;
+
+        showResult(player1Name, player1Choice, player2Name, player2Choice);
+
+        setTimeout(() => {
+          db.ref(`rooms/${currentRoomId}/moves`).remove();
+        }, 1500);
+      });
+      moveListenerAdded = true;
+    }
+  }
+}
+
+function showResult(p1Name, p1Choice, p2Name, p2Choice) {
+  const resultBox = document.getElementById("result");
+  const banterBox = document.getElementById("banter");
+
+  if (p1Choice === p2Choice) {
+    drawSound.play();
+    draws++;
+    resultBox.innerHTML = `<p>Both chose ${p1Choice}. 🤝 It's a draw!</p><img src="image.png" alt="Draw" class="result-img" style="width:90px;">`;
+    banterBox.innerText = drawBanter[Math.floor(Math.random() * drawBanter.length)];
+    if (!achievements.firstDraw) {
+      achievements.firstDraw = true;
+      showAchievement("🎯 First Draw!");
+    }
+  } else if (
+    (p1Choice === "stone" && p2Choice === "scissor") ||
+    (p1Choice === "paper" && p2Choice === "stone") ||
+    (p1Choice === "scissor" && p2Choice === "paper")
+  ) {
+    winSound.play();
+    wins++;
+    resultBox.innerHTML = `<p>${p1Name} wins! 🏆</p><img src="excited.gif" alt="Win" class="result-img" style="width:90px;">`;
+    banterBox.innerText = winBanter[Math.floor(Math.random() * winBanter.length)];
+    if (wins === 1 && !achievements.firstWin) {
+      achievements.firstWin = true;
+      showAchievement("🏅 First Win!");
+    }
+    if (wins === 5 && !achievements.fiveWins) {
+      achievements.fiveWins = true;
+      showAchievement("💪 5 Wins Streak!");
+    }
+  } else {
+    gameover.play();
+    losses++;
+    resultBox.innerHTML = `<p>${p1Name} loses! ❌</p><img src="you lose.png" alt="Lose" class="result-img" style="width:90px;">`;
+    banterBox.innerText = loseBanter[Math.floor(Math.random() * loseBanter.length)];
+    if (losses === 3 && !achievements.threeLosses) {
+      achievements.threeLosses = true;
+      showAchievement("😢 3 Losses!");
+    }
+  }
+
+  updateLeaderboard();
+}
+
+function resetGame() {
+  wins = 0;
+  losses = 0;
+  draws = 0;
+  achievements = {
+    firstWin: false,
+    fiveWins: false,
+    firstDraw: false,
+    threeLosses: false
+  };
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("banter").innerText = "";
+  document.getElementById("achievement").innerText = "";
+  updateLeaderboard();
+}
+
+function updateLeaderboard() {
+  document.getElementById("wins").innerText = wins;
+  document.getElementById("losses").innerText = losses;
+  document.getElementById("draws").innerText = draws;
+}
+
+function showAchievement(message) {
+  const achievementBox = document.getElementById("achievement");
+  achievementBox.innerText = message;
+  achievementBox.style.display = "block";
+  achievementBox.style.position = "fixed";
+  achievementBox.style.top = "50%";
+  achievementBox.style.left = "50%";
+  achievementBox.style.transform = "translate(-50%, -50%)";
+  achievementBox.style.background = "#00fff0";
+  achievementBox.style.color = "#232946";
+  achievementBox.style.padding = "1rem 2rem";
+  achievementBox.style.borderRadius = "1rem";
+  achievementBox.style.fontSize = "1.5rem";
+  achievementBox.style.zIndex = "9999";
+
+  setTimeout(() => {
+    achievementBox.style.display = "none";
+  }, 3000);
 }
 
 function toggleMusic() {
   const music = document.getElementById("bg-music");
   music.muted = !music.muted;
+  music.play().catch(err => console.warn("Play issue:", err));
   document.getElementById("music-toggle-btn").innerText = music.muted ? "🔇 Unmute Music" : "🔊 Mute Music";
 }
 
 function goBack() {
-  window.location.reload();
+  document.getElementById("game-ui").style.display = "none";
+  document.getElementById("room-controls").style.display = "none";
+  document.getElementById("avatar-section").style.display = "none";
+  document.getElementById("opponent-avatar-section").style.display = "none";
+  document.getElementById("mode-selection").style.display = "flex";
+  document.getElementById("back-button").style.display = "none";
+  document.getElementById("profile-display").style.display = "flex";
+  document.getElementById("main-heading").style.display = "block";
 }
+
+function showLoader(messageOrFalse) {
+  const loader = document.getElementById("loading");
+  if (!loader) return;
+  loader.innerText = typeof messageOrFalse === "string" ? messageOrFalse : "";
+  loader.style.display = messageOrFalse ? "flex" : "none";
+}
+
+// --- LEADERBOARD MODAL ---
+function showLeaderboard() {
+  document.getElementById("leaderboard-modal").style.display = "block";
+}
+function closeLeaderboard() {
+  document.getElementById("leaderboard-modal").style.display = "none";
+}
+
+// Optional: Close modal when clicking outside
+window.addEventListener("click", function(e) {
+  const modal = document.getElementById("leaderboard-modal");
+  if (modal && e.target === modal) {
+    modal.style.display = "none";
+  }
+});
