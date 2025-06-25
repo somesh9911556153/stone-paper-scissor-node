@@ -417,199 +417,60 @@
 
 // ---------- CONFIG & STATE ----------
 const choices = ["stone", "paper", "scissor"];
-let mode = null, roomId = "", playerRole = "";
-let wins = 0, losses = 0, draws = 0;
-
-const gameover = new Audio("gameover.mp3"),
-      winSound = new Audio("victory.mp3"),
-      drawSound = new Audio("draw.mp3");
-
-const winBanter  = ["You're on fire! 🔥","Keep going, champion!","Nice move!","Epic battle!","Unstoppable!"],
-      loseBanter = ["Better luck next time!","Try again!","Close one!","Oops!"],
-      drawBanter = ["Try again!","Even match!","So close!","Neck and neck!"];
-
-let achievements = {
-  firstWin: false,
-  fiveWins: false,
-  firstDraw: false,
-  threeLosses: false
-};
+let mode = null,
+  roomId = "",
+  playerRole = "";
+let wins = 0,
+  losses = 0,
+  draws = 0;
 
 let currentRoomId = null;
 let localUsername = "Player";
 let opponentUsername = "Waiting...";
 let playerId = "player1";
 
-// ---------- MODE SELECTION ----------
-function selectMode(selectedMode) {
-  const bgMusic = document.getElementById("bg-music");
+const gameover = new Audio("gameover.mp3"),
+  winSound = new Audio("victory.mp3"),
+  drawSound = new Audio("draw.mp3");
 
-  if (bgMusic && bgMusic.paused) {
-    const canPlay = bgMusic.canPlayType("audio/mpeg");
-    if (canPlay) {
-      bgMusic.play().catch(err => console.warn("Autoplay blocked:", err));
-    }
-  }
+const winBanter = [
+    "You're on fire! 🔥",
+    "Keep going, champion!",
+    "Nice move!",
+    "Epic battle!",
+    "Unstoppable!",
+  ],
+  loseBanter = [
+    "Better luck next time!",
+    "Try again!",
+    "Close one!",
+    "Oops!",
+  ],
+  drawBanter = [
+    "Try again!",
+    "Even match!",
+    "So close!",
+    "Neck and neck!",
+  ];
 
-  mode = selectedMode;
-  document.getElementById("mode-selection").style.display = "none";
-  document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
-  document.getElementById("back-button").style.display = "inline-block";
+let achievements = {
+  firstWin: false,
+  fiveWins: false,
+  firstDraw: false,
+  threeLosses: false,
+};
 
-  if (mode === "bot") {
-    document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
-    document.getElementById("room-controls").style.display = "none";
-    document.getElementById("game-ui").style.display = "block";
-    document.getElementById("player-role-label").style.display = "none";
-
-    document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("player-avatar").src = "avtaar1.png";
-    document.getElementById("player-username").innerText = localUsername;
-    document.getElementById("opponent-avatar").style.display = "none";
-    document.getElementById("opponent-username").style.display = "none";
-  } else {
-    document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
-    document.getElementById("room-controls").style.display = "block";
-    document.getElementById("game-ui").style.display = "none";
-    document.getElementById("avatar-section").style.display = "none";
-    showLoader(false);
-  }
-}
-
-function goBack() {
-  window.location.reload();
-}
-
-function handleChoice(choice) {
-  if (mode === "bot") playWithBot(choice);
-  else submitChoice(choice);
-}
-
-function playWithBot(userChoice) {
-  const comp = choices[Math.floor(Math.random() * choices.length)];
-  const res = getResult(userChoice, comp);
-  showResult(userChoice, comp, res);
-}
-
-function getResult(u, o) {
-  if (u === o) return "It's a draw!";
-  if ((u === "stone" && o === "scissor") || (u === "paper" && o === "stone") || (u === "scissor" && o === "paper")) {
-    return "You win!";
-  }
-  return "You lose!";
-}
-
-function showResult(u, o, res) {
-  const rd = document.getElementById("result"),
-        bd = document.getElementById("banter");
-
-  let html = `You chose: ${u}<br>Opponent chose: ${o}<br>${res}`;
-  if (res === "You win!") {
-    wins++;
-    winSound.play();
-    html += `<br><img src="excited.gif" style="width:100px;">`;
-  } else if (res === "You lose!") {
-    losses++;
-    gameover.pause(); gameover.currentTime = 0; gameover.play();
-    html += `<br><img src="you lose.png" style="width:80px;">`;
-  } else {
-    draws++;
-    drawSound.play();
-    html += `<br><img src="image.png" style="width:80px;">`;
-  }
-
-  rd.innerHTML = html;
-  const banterArr = res === "You win!" ? winBanter : res === "You lose!" ? loseBanter : drawBanter;
-  bd.innerText = banterArr[Math.floor(Math.random() * banterArr.length)];
-
-  updateLeaderboard();
-  checkAchievements();
-}
-
-function resetGame() {
-  ["result", "banter", "achievement"].forEach(id => document.getElementById(id).innerText = "");
-  wins = losses = draws = 0;
-  achievements = {
-    firstWin: false,
-    fiveWins: false,
-    firstDraw: false,
-    threeLosses: false
-  };
-  updateLeaderboard();
-
-  document.getElementById("opponent-avatar").style.display = "inline-block";
-  document.getElementById("opponent-username").style.display = "inline-block";
-}
-
-function updateLeaderboard() {
-  document.getElementById("wins").innerText = wins;
-  document.getElementById("losses").innerText = losses;
-  document.getElementById("draws").innerText = draws;
-}
-
-function checkAchievements() {
-  const aDiv = document.getElementById("achievement"), msgs = [];
-  if (!achievements.firstWin && wins >= 1) { achievements.firstWin = true; msgs.push("🏆 First Win!"); }
-  if (!achievements.fiveWins && wins >= 5) { achievements.fiveWins = true; msgs.push("🏆 5 Wins!"); }
-  if (!achievements.firstDraw && draws >= 1) { achievements.firstDraw = true; msgs.push("🤝 First Draw!"); }
-  if (!achievements.threeLosses && losses >= 3) { achievements.threeLosses = true; msgs.push("😅 3 Losses!"); }
-
-  if (msgs.length) {
-    aDiv.innerHTML = msgs.join("<br>");
-    setTimeout(() => { aDiv.innerHTML = ""; }, 3000);
-  }
-}
-
-function showLoader(messageOrFalse) {
-  const loader = document.getElementById("loading");
-  if (!loader) return;
-  if (messageOrFalse) {
-    loader.innerText = messageOrFalse;
-    loader.style.display = "flex";
-  } else {
-    loader.innerText = "";
-    loader.style.display = "none";
-  }
-}
-
-window.addEventListener("load", () => showLoader(false));
-
-document.getElementById("toggle-leaderboard-btn").addEventListener("click", () => {
-  const lbDiv = document.querySelector(".leaderboard-inline");
-  const hidden = getComputedStyle(lbDiv).display === "none";
-  lbDiv.style.display = hidden ? "block" : "none";
-  document.getElementById("toggle-leaderboard-btn").textContent = hidden ? "Hide Leaderboard" : "Show Leaderboard";
-});
-
-function toggleMusic() {
-  const bgMusic = document.getElementById("bg-music");
-  const btn = document.getElementById("music-toggle-btn");
-  if (bgMusic.paused) {
-    bgMusic.play();
-    btn.textContent = "🔊 Mute Music";
-  } else {
-    bgMusic.pause();
-    btn.textContent = "🔇 Unmute Music";
-  }
-}
-
-document.querySelectorAll('.emoji').forEach(emoji => {
-  emoji.addEventListener('click', () => {
-    emoji.classList.add('clicked');
-    setTimeout(() => emoji.classList.remove('clicked'), 300);
-  });
-});
-
+// ---------- PROFILE MANAGEMENT ----------
 function toggleProfile() {
-  const section = document.getElementById('profile-section');
-  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+  const section = document.getElementById("profile-section");
+  section.style.display = section.style.display === "none" ? "block" : "none";
 }
 
 function saveProfile() {
-  const name = document.getElementById('username-input').value.trim();
+  const name = document.getElementById("username-input").value.trim();
   if (name) {
     localUsername = name;
-    document.getElementById('local-username').innerText = localUsername;
+    document.getElementById("local-username").innerText = localUsername;
     if (currentRoomId) {
       db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
     }
@@ -618,46 +479,94 @@ function saveProfile() {
 }
 
 function listenToOpponentName(roomId) {
-  db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+  db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
     const players = snapshot.val();
     for (const id in players) {
       if (id !== playerId && players[id].name) {
         opponentUsername = players[id].name;
-        document.getElementById('opponent-username').innerText = opponentUsername;
+        document.getElementById("opponent-username").innerText = opponentUsername;
+        document.getElementById("opponent-avatar").src = "avtaar2.png";
+        document.getElementById("opponent-section").style.display = "block";
       }
     }
   });
 }
 
-function createRoom() {
-  currentRoomId = Math.random().toString(36).substring(2, 8);
-  playerId = "player1";
-  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({ name: localUsername });
-  listenToOpponentName(currentRoomId);
-  document.getElementById('current-room').innerText = currentRoomId;
-  document.getElementById('mode-selection').style.display = 'none';
-  setupGameUI();
-}
+// ---------- MODE SELECTION ----------
+function selectMode(selectedMode) {
+  mode = selectedMode;
+  document.getElementById("mode-selection").style.display = "none";
+  document.getElementById("back-button").style.display = "inline-block";
 
-function joinRoom() {
-  const input = document.getElementById('room-id').value.trim();
-  if (input) {
-    currentRoomId = input;
-    playerId = "player2";
-    db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({ name: localUsername });
-    listenToOpponentName(currentRoomId);
-    document.getElementById('current-room').innerText = currentRoomId;
-    document.getElementById('mode-selection').style.display = 'none';
-    setupGameUI();
+  if (mode === "bot") {
+    document.getElementById("mode-status").innerText = "Playing vs Computer 🤖";
+    document.getElementById("room-controls").style.display = "none";
+    document.getElementById("game-ui").style.display = "block";
+
+    document.getElementById("local-username").innerText = localUsername;
+    document.getElementById("player-avatar").src = "avtaar1.png";
+    document.getElementById("avatar-section").style.display = "block";
+    document.getElementById("opponent-section").style.display = "none";
+  } else {
+    document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
+    document.getElementById("room-controls").style.display = "block";
+    document.getElementById("game-ui").style.display = "none";
+    document.getElementById("avatar-section").style.display = "none";
   }
 }
 
-function setupGameUI() {
-  document.getElementById("game-ui").style.display = "block";
-  document.getElementById("avatar-section").style.display = "block";
-  document.getElementById("player-avatar").src = "avtaar1.png";
-  document.getElementById("player-username").innerText = localUsername;
-  document.getElementById("opponent-avatar").style.display = "inline-block";
-  document.getElementById("opponent-username").style.display = "inline-block";
+function goBack() {
+  window.location.reload();
 }
 
+// ---------- GAME CHOICE HANDLING ----------
+function handleChoice(choice) {
+  console.log(`${localUsername} chose ${choice}`);
+}
+
+function resetGame() {
+  console.log("Resetting game...");
+}
+
+// ---------- MUSIC TOGGLE ----------
+function toggleMusic() {
+  const music = document.getElementById("bg-music");
+  music.muted = !music.muted;
+  document.getElementById("music-toggle-btn").innerText = music.muted
+    ? "🔇 Unmute Music"
+    : "🔊 Mute Music";
+}
+
+// ---------- ROOM FUNCTIONS ----------
+function createRoom() {
+  currentRoomId = Math.random().toString(36).substring(2, 8);
+  playerId = "player1";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername,
+  });
+  listenToOpponentName(currentRoomId);
+  document.getElementById("current-room").innerText = currentRoomId;
+  document.getElementById("room-controls").style.display = "none";
+  document.getElementById("game-ui").style.display = "block";
+  document.getElementById("player-avatar").src = "avtaar1.png";
+  document.getElementById("avatar-section").style.display = "block";
+  document.getElementById("local-username").innerText = localUsername;
+}
+
+function joinRoom() {
+  const input = document.getElementById("room-id").value.trim();
+  if (input) {
+    currentRoomId = input;
+    playerId = "player2";
+    db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+      name: localUsername,
+    });
+    listenToOpponentName(currentRoomId);
+    document.getElementById("current-room").innerText = currentRoomId;
+    document.getElementById("room-controls").style.display = "none";
+    document.getElementById("game-ui").style.display = "block";
+    document.getElementById("player-avatar").src = "avtaar1.png";
+    document.getElementById("avatar-section").style.display = "block";
+    document.getElementById("local-username").innerText = localUsername;
+  }
+}
