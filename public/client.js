@@ -423,13 +423,13 @@ let mode = null,
     opponentUsername = "Waiting...",
     wins = 0, losses = 0, draws = 0;
 
-const gameover = new Audio("gameover.mp3"),
-      winSound = new Audio("victory.mp3"),
-      drawSound = new Audio("draw.mp3");
+const gameover = new Audio("gameover.mp3");
+const winSound = new Audio("victory.mp3");
+const drawSound = new Audio("draw.mp3");
 
-const winBanter  = ["You're on fire! 🔥","Keep going, champion!","Nice move!","Epic battle!","Unstoppable!"],
-      loseBanter = ["Better luck next time!","Try again!","Close one!","Oops!"],
-      drawBanter = ["Try again!","Even match!","So close!","Neck and neck!"];
+const winBanter = ["You're on fire! 🔥", "Keep going, champion!", "Nice move!", "Epic battle!", "Unstoppable!"];
+const loseBanter = ["Better luck next time!", "Try again!", "Close one!", "Oops!"];
+const drawBanter = ["Try again!", "Even match!", "So close!", "Neck and neck!"];
 
 let achievements = {
   firstWin: false,
@@ -437,6 +437,14 @@ let achievements = {
   firstDraw: false,
   threeLosses: false
 };
+
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loading");
+  if (loader) loader.style.display = "none";
+
+  const modeSelection = document.getElementById("mode-selection");
+  if (modeSelection) modeSelection.style.display = "block";
+});
 
 function selectMode(selectedMode) {
   mode = selectedMode;
@@ -449,20 +457,19 @@ function selectMode(selectedMode) {
     document.getElementById("game-ui").style.display = "block";
     document.getElementById("room-controls").style.display = "none";
 
-    document.getElementById("avatar-section").style.display = "block";
     document.getElementById("player-avatar").src = "avtaar1.png";
-    document.getElementById("local-username").innerText = localUsername;
-
+    document.getElementById("avatar-section").style.display = "block";
     document.getElementById("opponent-avatar-section").style.display = "none";
-    showLoader(false);
+    document.getElementById("local-username").innerText = localUsername;
+    document.getElementById("opponent-username").innerText = "Computer 🤖";
   } else {
     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
     document.getElementById("room-controls").style.display = "block";
-
     document.getElementById("avatar-section").style.display = "none";
     document.getElementById("opponent-avatar-section").style.display = "none";
-    showLoader(false);
   }
+
+  showLoader(false); // Clear loader if left on
 }
 
 function createRoom() {
@@ -495,7 +502,6 @@ function joinRoom() {
 function launchGameUI() {
   document.getElementById("room-controls").style.display = "none";
   document.getElementById("game-ui").style.display = "block";
-
   document.getElementById("avatar-section").style.display = "block";
   document.getElementById("player-avatar").src = "avtaar1.png";
   document.getElementById("local-username").innerText = localUsername;
@@ -508,28 +514,28 @@ function launchGameUI() {
 }
 
 function listenToOpponentName(roomId) {
-  db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+  db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
     const players = snapshot.val();
     for (const id in players) {
-      if (id !== playerId && players[id].name && players[id].name !== opponentUsername) {
+      if (id !== playerId && players[id].name) {
         opponentUsername = players[id].name;
-        document.getElementById('opponent-username').innerText = opponentUsername;
-        showLoader(false);
+        document.getElementById("opponent-username").innerText = opponentUsername;
       }
     }
+    showLoader(false); // Hide once opponent joins
   });
 }
 
 function toggleProfile() {
-  const section = document.getElementById('profile-section');
-  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+  const section = document.getElementById("profile-section");
+  section.style.display = section.style.display === "none" ? "block" : "none";
 }
 
 function saveProfile() {
-  const name = document.getElementById('username-input').value.trim();
+  const name = document.getElementById("username-input").value.trim();
   if (name) {
     localUsername = name;
-    document.getElementById('local-username').innerText = localUsername;
+    document.getElementById("local-username").innerText = localUsername;
     if (currentRoomId && playerId) {
       db.ref(`rooms/${currentRoomId}/players/${playerId}/name`).set(localUsername);
     }
@@ -551,12 +557,13 @@ function showLoader(messageOrFalse) {
 
 function handleChoice(choice) {
   console.log(`${localUsername} chose ${choice}`);
+  // Add game logic here (for vs computer or multiplayer)
 }
 
 function toggleMusic() {
-  const music = document.getElementById('bg-music');
+  const music = document.getElementById("bg-music");
   music.muted = !music.muted;
-  document.getElementById('music-toggle-btn').innerText = music.muted ? "🔇 Unmute Music" : "🔊 Mute Music";
+  document.getElementById("music-toggle-btn").innerText = music.muted ? "🔇 Unmute Music" : "🔊 Mute Music";
 }
 
 function goBack() {
