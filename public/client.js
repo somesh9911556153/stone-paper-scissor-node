@@ -121,7 +121,7 @@ function selectMode(selectedMode) {
   document.getElementById("back-button").style.display = "inline-block";
   document.getElementById("profile-display").style.display = "none";
   document.getElementById("main-heading").style.display = "none";
-
+  
   const avatar = localStorage.getItem("avatar") || "avtaar1.png";
   document.getElementById("player-avatar-inline").src = avatar;
 
@@ -138,13 +138,14 @@ function selectMode(selectedMode) {
     document.getElementById("opponent-avatar").style.display = "none";
     document.getElementById("local-username").innerText = localUsername;
     document.getElementById("opponent-username").innerText = opponentUsername;
-  } else {
+  } else if (mode === "online") {
     opponentUsername = "Waiting...";
     document.getElementById("mode-status").innerHTML = `
       <span>${localUsername}</span> <img src="${avatar}" class="inline-avatar"> vs 
       <img src="loading.gif" class="inline-avatar"> <span>${opponentUsername}</span>`;
     document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
-    document.getElementById("room-controls").style.display = "block";
+    document.getElementById("room-controls").style.display = "block"; // <-- SHOW ROOM CONTROLS
+    document.getElementById("game-ui").style.display = "none";       // <-- HIDE GAME UI
     document.getElementById("avatar-section").style.display = "none";
     document.getElementById("opponent-avatar-section").style.display = "none";
   }
@@ -293,16 +294,14 @@ function goBack() {
   document.getElementById("back-button").style.display = "none";
   document.getElementById("profile-display").style.display = "flex";
   document.getElementById("main-heading").style.display = "block";
-  document.getElementById("toggle-leaderboard-btn").style.display = "none"; 
+  document.getElementById("toggle-leaderboard-btn").style.display = "none";
 }
-
 function showLoader(messageOrFalse) {
   const loader = document.getElementById("loading");
   if (!loader) return;
   loader.innerText = typeof messageOrFalse === "string" ? messageOrFalse : "";
   loader.style.display = messageOrFalse ? "flex" : "none";
 }
-
 // --- LEADERBOARD MODAL ---
 function showLeaderboard() {
   document.getElementById("leaderboard-modal").style.display = "block";
