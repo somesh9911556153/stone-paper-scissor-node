@@ -14,6 +14,7 @@
   <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
      background: rgba(0,0,0,0.6); color: #00fff0; font-size: 2rem;
      display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    🔄 Connecting to room...
   </div>
 
   <div class="game-container">
@@ -21,12 +22,20 @@
       <h1>Stone Paper Scissor</h1>
 
       <button id="music-toggle-btn" onclick="toggleMusic()">🔊 Mute Music</button>
+      <button id="avatar-btn" onclick="toggleProfile()">👤 Profile</button>
       <button id="back-button" onclick="goBack()" style="display: none;">⬅ Back</button>
 
       <div class="emoji-banner">
         <span class="emoji">🗿</span>
         <span class="emoji">📄</span>
         <span class="emoji">✂️</span>
+      </div>
+
+      <!-- Profile Section -->
+      <div id="profile-section" style="display: none; margin-bottom: 1rem;">
+        <h3>Profile</h3>
+        <input type="text" id="username-input" placeholder="Enter your name" />
+        <button onclick="saveProfile()">Save</button>
       </div>
 
       <!-- MODE SELECTION -->
@@ -52,9 +61,9 @@
           <p>Room: <span id="current-room"></span></p>
         </div>
 
-        <!-- 🧑‍🎨 Avatar section -->
-        <div id="avatar-section" style="display: none; text-align:center; margin-bottom:1rem;">
-          <img id="player-avatar" src="" alt="Avatar" style="width: 80px; border-radius: 50%; box-shadow: 0 0 10px cyan;" />
+        <div class="profile-display">
+          <p><strong>You:</strong> <span id="local-username">Player</span></p>
+          <p><strong>Opponent:</strong> <span id="opponent-username">Waiting...</span></p>
         </div>
 
         <div class="button">
@@ -102,10 +111,10 @@
     const db = firebase.database();
   </script>
 
-  <!-- Game Logic -->
   <script src="client.js"></script>
 
   <!-- Background Music -->
   <audio id="bg-music" src="music.mp3" loop></audio>
 </body>
 </html>
+
