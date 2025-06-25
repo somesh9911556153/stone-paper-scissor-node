@@ -449,18 +449,20 @@ function selectMode(selectedMode) {
     document.getElementById("game-ui").style.display = "block";
     document.getElementById("room-controls").style.display = "none";
 
-    document.getElementById("player-avatar").src = "avtaar1.png";
     document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("opponent-avatar-section").style.display = "none";
+    document.getElementById("player-avatar").src = "avtaar1.png";
     document.getElementById("local-username").innerText = localUsername;
+
+    document.getElementById("opponent-avatar-section").style.display = "none";
+    showLoader(false);
   } else {
     document.getElementById("mode-status").innerText = "Online Multiplayer Mode 🌐";
     document.getElementById("room-controls").style.display = "block";
+
     document.getElementById("avatar-section").style.display = "none";
     document.getElementById("opponent-avatar-section").style.display = "none";
+    showLoader(false);
   }
-
-  showLoader(false); // Clear loader on entry
 }
 
 function createRoom() {
@@ -493,6 +495,7 @@ function joinRoom() {
 function launchGameUI() {
   document.getElementById("room-controls").style.display = "none";
   document.getElementById("game-ui").style.display = "block";
+
   document.getElementById("avatar-section").style.display = "block";
   document.getElementById("player-avatar").src = "avtaar1.png";
   document.getElementById("local-username").innerText = localUsername;
@@ -508,12 +511,12 @@ function listenToOpponentName(roomId) {
   db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
     const players = snapshot.val();
     for (const id in players) {
-      if (id !== playerId && players[id].name) {
+      if (id !== playerId && players[id].name && players[id].name !== opponentUsername) {
         opponentUsername = players[id].name;
         document.getElementById('opponent-username').innerText = opponentUsername;
+        showLoader(false);
       }
     }
-    showLoader(false); // Hide loader once opponent joins
   });
 }
 
