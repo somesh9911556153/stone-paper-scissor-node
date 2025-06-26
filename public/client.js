@@ -144,8 +144,8 @@ function selectMode(selectedMode) {
       <span>${localUsername}</span> <img src="${avatar}" class="inline-avatar"> vs 
       <img src="loading.gif" class="inline-avatar"> <span>${opponentUsername}</span>`;
     document.getElementById("toggle-leaderboard-btn").style.display = "inline-block";
-    document.getElementById("room-controls").style.display = "block"; // <-- SHOW ROOM CONTROLS
-    document.getElementById("game-ui").style.display = "none";       // <-- HIDE GAME UI
+    document.getElementById("room-controls").style.display = "block";
+    document.getElementById("game-ui").style.display = "none";
     document.getElementById("avatar-section").style.display = "none";
     document.getElementById("opponent-avatar-section").style.display = "none";
   }
@@ -156,9 +156,8 @@ function selectMode(selectedMode) {
     bgMusic.play().catch(err => console.warn("Autoplay blocked:", err));
   }
 }
-// --- Multiplayer Room Logic ---
-// Place this after your selectMode function
 
+// --- Multiplayer Room Logic ---
 function createRoom() {
   const roomInput = document.getElementById("room-id").value.trim();
   if (!roomInput) {
@@ -197,14 +196,12 @@ function listenToOpponentName(roomId) {
   db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
     const players = snapshot.val();
     if (players && players.player1 && players.player2) {
-      // Both players are present, start the game UI
       document.getElementById("room-controls").style.display = "none";
       document.getElementById("game-ui").style.display = "block";
       document.getElementById("avatar-section").style.display = "block";
       document.getElementById("opponent-avatar-section").style.display = "block";
       document.getElementById("player-avatar").src = players[playerId].avatar || "avtaar1.png";
       document.getElementById("local-username").innerText = players[playerId].name || "Player";
-      // Set opponent info
       const oppId = playerId === "player1" ? "player2" : "player1";
       document.getElementById("opponent-avatar").src = players[oppId].avatar || "avtaar2.png";
       document.getElementById("opponent-username").innerText = players[oppId].name || "Opponent";
@@ -352,12 +349,14 @@ function goBack() {
   document.getElementById("main-heading").style.display = "block";
   document.getElementById("toggle-leaderboard-btn").style.display = "none";
 }
+
 function showLoader(messageOrFalse) {
   const loader = document.getElementById("loading");
   if (!loader) return;
   loader.innerText = typeof messageOrFalse === "string" ? messageOrFalse : "";
   loader.style.display = messageOrFalse ? "flex" : "none";
 }
+
 // --- LEADERBOARD MODAL ---
 function showLeaderboard() {
   document.getElementById("leaderboard-modal").style.display = "block";
