@@ -156,6 +156,62 @@ function selectMode(selectedMode) {
     bgMusic.play().catch(err => console.warn("Autoplay blocked:", err));
   }
 }
+// --- Multiplayer Room Logic ---
+// Place this after your selectMode function
+
+function createRoom() {
+  const roomInput = document.getElementById("room-id").value.trim();
+  if (!roomInput) {
+    alert("Please enter a room code (password) to create a room.");
+    return;
+  }
+  currentRoomId = roomInput;
+  playerId = "player1";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername,
+    avatar: selectedAvatar
+  });
+
+  showLoader("⏳ Waiting for Player 2 to join...");
+  listenToOpponentName(currentRoomId);
+}
+
+function joinRoom() {
+  const roomInput = document.getElementById("room-id").value.trim();
+  if (!roomInput) {
+    alert("Please enter the room code (password) to join.");
+    return;
+  }
+  currentRoomId = roomInput;
+  playerId = "player2";
+  db.ref(`rooms/${currentRoomId}/players/${playerId}`).set({
+    name: localUsername,
+    avatar: selectedAvatar
+  });
+
+  showLoader("🔌 Connecting...");
+  listenToOpponentName(currentRoomId);
+}
+
+function listenToOpponentName(roomId) {
+  db.ref(`rooms/${roomId}/players`).on("value", (snapshot) => {
+    const players = snapshot.val();
+    if (players && players.player1 && players.player2) {
+      // Both players are present, start the game UI
+      document.getElementById("room-controls").style.display = "none";
+      document.getElementById("game-ui").style.display = "block";
+      document.getElementById("avatar-section").style.display = "block";
+      document.getElementById("opponent-avatar-section").style.display = "block";
+      document.getElementById("player-avatar").src = players[playerId].avatar || "avtaar1.png";
+      document.getElementById("local-username").innerText = players[playerId].name || "Player";
+      // Set opponent info
+      const oppId = playerId === "player1" ? "player2" : "player1";
+      document.getElementById("opponent-avatar").src = players[oppId].avatar || "avtaar2.png";
+      document.getElementById("opponent-username").innerText = players[oppId].name || "Opponent";
+      showLoader(false);
+    }
+  });
+}
 
 // --- GAME LOGIC ---
 function handleChoice(choice) {
