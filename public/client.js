@@ -1,167 +1,279 @@
-const choices = ["rock", "paper", "scissors"];
-let localUsername = "";
-let opponentUsername = "Opponent";
-let playerScore = 0;
-let botScore = 0;
-let selectedAvatar = "";
-let mode = ""; // "bot" or "multiplayer"
-let currentRoomId = "";
-const socket = io();
+// ---------- CONFIG & STATE ----------
+const choices = ["stone", "paper", "scissor"];
+let mode = null,
+  currentRoomId = null,
+  playerRole = "",
+  localUsername = "Player",
+  selectedAvatar = "avtaar1.png",
+  wins = 0,
+  losses = 0,
+  draws = 0;
 
-// --- UI Handlers ---
+let roomJoined = false;
+let musicPlaying = false;
 
-function showSection(id) {
-  document.querySelectorAll("section").forEach((section) => {
-    section.style.display = "none";
-  });
-  document.getElementById(id).style.display = "block";
+const gameover = new Audio("gameover.mp3"),
+  winSound = new Audio("victory.mp3"),
+  drawSound = new Audio("draw.mp3");
+
+// ---------- MUSIC ----------
+function toggleMusic() {
+  const music = document.getElementById('bg-music');
+  if (music.paused) {
+    music.play();
+    document.getElementById('music-toggle-btn').textContent = "🔇 Mute Music";
+    musicPlaying = true;
+  } else {
+    music.pause();
+    document.getElementById('music-toggle-btn').textContent = "🔊 Play Music";
+    musicPlaying = false;
+  }
 }
 
-function setAvatar(avatar) {
-  selectedAvatar = avatar;
-  document.getElementById("selected-avatar").src = avatar;
-  document.getElementById("confirm-avatar").style.display = "inline-block";
-}
+window.addEventListener('click', () => {
+  if (!musicPlaying) {
+    document.getElementById('bg-music').play().catch(() => {});
+    musicPlaying = true;
+  }
+}, { once: true });
 
-function startGame() {
-  localUsername = document.getElementById("username").value.trim();
-  if (!localUsername) {
-    alert("Please enter a username.");
+// ---------- SET PROFILE ----------
+function saveProfile() {
+  const usernameInput = document.getElementById('profile-username').value.trim();
+  const selectedAvatarElement = document.querySelector('.avatar-option.selected');
+  if (!usernameInput || !selectedAvatarElement) {
+    alert("Please enter a username and select an avatar.");
     return;
   }
-  showSection("mode-selection");
+  localUsername = usernameInput;
+  selectedAvatar = selectedAvatarElement.getAttribute('data-avatar');
+  localStorage.setItem('username', localUsername);
+  localStorage.setItem('avatar', selectedAvatar);
+  document.getElementById('profile-username-label').innerText = localUsername;
+  document.getElementById('profile-display-avatar').src = selectedAvatar;
+  closeProfileModal();
 }
 
+document.querySelectorAll(".avatar-option").forEach(img => {
+  img.addEventListener("click", () => {
+    document.querySelectorAll(".avatar-option").forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+  });
+});
+
+// ---------- MODE SELECTION ----------
 function selectMode(selectedMode) {
   mode = selectedMode;
+  document.getElementById('mode-selection').style.display = 'none';
+  document.getElementById('profile-display').style.display = 'none';
+  document.getElementById('toggle-leaderboard-btn').style.display = 'none';
+  document.getElementById('back-button').style.display = 'block';
+
   if (mode === "bot") {
-    showSection("avatar-selection");
+    startGameVsComputer();
+    document.getElementById('opponent-username').textContent = 'Computer 🤖';
+    document.getElementById('opponent-avatar-inline').src = 'bot.png';
   } else {
-    showSection("room-selection");
+    document.getElementById("room-controls").style.display = "block";
   }
 }
 
-function confirmAvatar() {
-  document.getElementById("player-avatar").src = selectedAvatar;
+// ---------- PLAY VS BOT ----------
+function startGameVsComputer() {
+  document.getElementById("game-ui").style.display = "block";
   document.getElementById("local-username").innerText = localUsername;
-  if (mode === "bot") {
-    showSection("game-ui");
-    document.getElementById("avatar-section").style.display = "block";
-    document.getElementById("opponent-avatar-section").style.display = "block";
-    document.getElementById("opponent-avatar").src = "avtaar2.png";
-    document.getElementById("opponent-username").innerText = opponentUsername;
-  } else {
-    socket.emit("join-room", currentRoomId);
-    showLoader("⏳ Waiting for opponent...");
-  }
+  document.getElementById("player-avatar-inline").src = selectedAvatar;
+  document.getElementById("opponent-username").innerText = "Computer 🤖";
+  document.getElementById("opponent-avatar-inline").src = "bot.png";
+  document.getElementById("toggle-leaderboard-btn").style.display = "block";
 }
 
+// ---------- FIREBASE ROOM LOGIC ----------
 function createRoom() {
-  const roomInput = document.getElementById("room-id").value.trim();
-  if (!roomInput) {
-    alert("Please enter a room code (password) to create a room.");
-    return;
-  }
-  currentRoomId = roomInput;
-  showLoader("⏳ Waiting for Player 2 to join...");
-  socket.emit("join-room", roomInput);
+  const roomId = Math.random().toString(36).substr(2, 6);
+  const roomRef = firebase.database().ref("rooms/" + roomId);
+
+  document.getElementById("loading").style.display = "flex";
+  roomRef.set({
+    player1: { name: localUsername, move: null, avatar: selectedAvatar },
+    player2: null
+  }).then(() => {
+    currentRoomId = roomId;
+    playerRole = "player1";
+    roomJoined = true;
+    const currentRoomElem = document.getElementById("current-room");
+    if (currentRoomElem) currentRoomElem.innerText = roomId;
+    document.getElementById("loading").style.display = "none";
+    startOnlineGame();
+    listenToRoom(roomId);
+  }).catch(err => {
+    console.error("Room creation failed:", err);
+    document.getElementById("loading").style.display = "none";
+    alert("Error creating room.");
+  });
 }
 
 function joinRoom() {
-  const roomInput = document.getElementById("room-id").value.trim();
-  if (!roomInput) {
-    alert("Please enter the room code (password) to join.");
-    return;
-  }
-  currentRoomId = roomInput;
-  showLoader("🔌 Connecting...");
-  socket.emit("join-room", roomInput);
+  const roomId = document.getElementById("room-id").value.trim();
+  document.getElementById("loading").style.display = "flex";
+  firebase.database().ref("rooms/" + roomId).once("value").then(snapshot => {
+    if (snapshot.exists() && !snapshot.val().player2) {
+      firebase.database().ref("rooms/" + roomId + "/player2").set({
+        name: localUsername,
+        move: null,
+        avatar: selectedAvatar
+      });
+      currentRoomId = roomId;
+      playerRole = "player2";
+      roomJoined = true;
+      const currentRoomElem = document.getElementById("current-room");
+      if (currentRoomElem) currentRoomElem.innerText = roomId;
+      document.getElementById("loading").style.display = "none";
+      startOnlineGame();
+      listenToRoom(roomId);
+    } else {
+      alert("Room not found or already full.");
+      document.getElementById("loading").style.display = "none";
+    }
+  });
 }
 
+function startOnlineGame() {
+  document.getElementById("game-ui").style.display = "block";
+  document.getElementById("local-username").innerText = localUsername;
+  document.getElementById("player-avatar-inline").src = selectedAvatar;
+  document.getElementById("toggle-leaderboard-btn").style.display = "block";
+}
+
+function listenToRoom(roomId) {
+  firebase.database().ref("rooms/" + roomId).on("value", snapshot => {
+    const room = snapshot.val();
+    if (!room) return;
+    const me = room[playerRole];
+    const opponentRole = playerRole === "player1" ? "player2" : "player1";
+    const opponent = room[opponentRole];
+
+    if (opponent) {
+      document.getElementById("opponent-username").innerText = opponent.name;
+      document.getElementById("opponent-avatar-inline").src = opponent.avatar;
+    }
+
+    if (me?.move && opponent?.move) {
+      checkResult(me.move, opponent.move);
+    }
+  });
+}
+
+// ---------- GAME LOGIC ----------
 function handleChoice(choice) {
   if (mode === "bot") {
-    const botChoice = choices[Math.floor(Math.random() * choices.length)];
-    showResult(localUsername, choice, opponentUsername, botChoice);
+    const botChoice = choices[Math.floor(Math.random() * 3)];
+    checkResult(choice, botChoice);
   } else {
-    socket.emit("submit-choice", { roomId: currentRoomId, choice });
+    firebase.database().ref(`rooms/${currentRoomId}/${playerRole}/move`).set(choice);
   }
 }
 
-function showResult(player1, choice1, player2, choice2) {
+function checkResult(p1, p2) {
   let resultText = "";
-  if (choice1 === choice2) {
-    resultText = "It's a tie!";
-  } else if (
-    (choice1 === "rock" && choice2 === "scissors") ||
-    (choice1 === "scissors" && choice2 === "paper") ||
-    (choice1 === "paper" && choice2 === "rock")
-  ) {
-    resultText = `${player1} wins!`;
-    if (player1 === localUsername) playerScore++;
-    else botScore++;
+  let gif = "";
+  if (p1 === p2) {
+    resultText = "It's a draw!";
+    gif = '<img src="image.png" alt="Draw" style="width:100px;">';
+    drawSound.play();
+    draws++;
+  } else if ((p1 === "stone" && p2 === "scissor") || (p1 === "paper" && p2 === "stone") || (p1 === "scissor" && p2 === "paper")) {
+    resultText = "You win!";
+    gif = '<img src="excited.gif" alt="Win" style="width:100px;">';
+    winSound.play();
+    wins++;
   } else {
-    resultText = `${player2} wins!`;
-    if (player2 === localUsername) playerScore++;
-    else botScore++;
+    resultText = "You lose!";
+    gif = '<img src="you lose.png" alt="Lose" style="width:100px;">';
+    gameover.play();
+    losses++;
   }
-
-  document.getElementById("result").innerText = resultText;
-  document.getElementById("score").innerText = `${localUsername}: ${playerScore} | ${opponentUsername}: ${botScore}`;
+  document.getElementById("result").innerHTML = resultText + "<br>" + gif;
+  document.getElementById("wins").innerText = wins;
+  document.getElementById("losses").innerText = losses;
+  document.getElementById("draws").innerText = draws;
+  updateLeaderboard();
 }
+
+function resetGame() {
+  if (mode === "bot") {
+    document.getElementById("result").innerText = "";
+    return;
+  }
+  firebase.database().ref(`rooms/${currentRoomId}/player1/move`).set(null);
+  firebase.database().ref(`rooms/${currentRoomId}/player2/move`).set(null);
+  document.getElementById("result").innerText = "";
+}
+
+// ---------- LEADERBOARD ----------
+function updateLeaderboard() {
+  const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  const idx = leaderboard.findIndex(entry => entry.name === localUsername);
+  const entry = { name: localUsername, wins, losses, draws, avatar: selectedAvatar };
+  if (idx >= 0) leaderboard[idx] = entry;
+  else leaderboard.push(entry);
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  leaderboard.sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+  let html = "";
+  leaderboard.forEach(entry => {
+    html += `<tr>
+      <td><img src="${entry.avatar}" style="width:32px;height:32px;border-radius:50%;"></td>
+      <td>${entry.name}</td>
+      <td>${entry.wins}</td>
+      <td>${entry.losses}</td>
+      <td>${entry.draws}</td>
+    </tr>`;
+  });
+  document.getElementById("leaderboard-table").innerHTML = html;
+}
+
+function showLeaderboard() {
+  renderLeaderboard();
+  document.getElementById("leaderboard-modal").style.display = "block";
+}
+
+function closeLeaderboard() {
+  document.getElementById("leaderboard-modal").style.display = "none";
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const storedUsername = localStorage.getItem('username');
+  const storedAvatar = localStorage.getItem('avatar');
+  if (storedUsername && storedAvatar) {
+    localUsername = storedUsername;
+    selectedAvatar = storedAvatar;
+    document.getElementById('profile-username-label').innerText = localUsername;
+    document.getElementById('profile-display-avatar').src = selectedAvatar;
+  }
+});
 
 function goBack() {
-  playerScore = 0;
-  botScore = 0;
-  localUsername = "";
-  selectedAvatar = "";
-  document.getElementById("username").value = "";
-  document.getElementById("room-id").value = "";
-  document.getElementById("result").innerText = "";
-  document.getElementById("score").innerText = "";
-  document.getElementById("selected-avatar").src = "";
-  document.getElementById("confirm-avatar").style.display = "none";
-  showSection("start");
-}
-
-function showLoader(text) {
-  const loader = document.getElementById("loader");
-  if (text) {
-    loader.innerText = text;
-    loader.style.display = "block";
-    document.getElementById("room-controls").style.display = "none";
-  } else {
-    loader.style.display = "none";
-  }
-}
-
-// --- Socket.IO Listeners ---
-
-socket.on("start-game", () => {
+  document.getElementById("game-ui").style.display = "none";
   document.getElementById("room-controls").style.display = "none";
-  document.getElementById("game-ui").style.display = "block";
-  document.getElementById("avatar-section").style.display = "block";
-  document.getElementById("opponent-avatar-section").style.display = "block";
+  document.getElementById("mode-selection").style.display = "block";
+  document.getElementById("back-button").style.display = "none";
+  document.getElementById("profile-display").style.display = "flex";
+  document.getElementById("toggle-leaderboard-btn").style.display = "none";
+  document.getElementById("leaderboard-modal").style.display = "none";
+  document.getElementById('result').innerHTML = '';
+  document.getElementById('banter').innerHTML = '';
+  document.getElementById('achievement').innerHTML = '';
+}
 
-  document.getElementById("player-avatar").src = selectedAvatar;
-  document.getElementById("local-username").innerText = localUsername;
-  document.getElementById("opponent-username").innerText = opponentUsername;
-  document.getElementById("opponent-avatar").src = "avtaar2.png"; // Placeholder avatar
+function openProfileModal() {
+  document.getElementById('profile-modal').style.display = 'block';
+}
 
-  showLoader(false);
-});
-
-socket.on("round-result", ({ choices, result }) => {
-  const ids = Object.keys(choices);
-  const [id1, id2] = ids;
-  const yourId = socket.id;
-  const yourChoice = choices[yourId];
-  const oppId = ids.find((id) => id !== yourId);
-  const oppChoice = choices[oppId];
-
-  showResult(localUsername, yourChoice, opponentUsername, oppChoice);
-});
-
-socket.on("player-left", () => {
-  alert("Opponent left the game.");
-  goBack();
-});
+function closeProfileModal() {
+  document.getElementById('profile-modal').style.display = 'none';
+}
